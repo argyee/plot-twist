@@ -1,0 +1,26 @@
+{
+  "name": "plot-twist",
+  "version": "1.0.0",
+  "description": "Movie bot for discord",
+  "keywords": [],
+  "homepage": "https://github.com/argyee/plot-twist#readme",
+  "bugs": {
+    "url": "https://github.com/argyee/plot-twist/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/argyee/plot-twist.git"
+  },
+  "license": "MIT",
+  "author": "argyee",
+  "type": "commonjs",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "discord.js": "^14.24.0",
+    "dotenv": "^17.2.3"
+  }
+}
