@@ -1,7 +1,11 @@
 // Main Discord bot file
+//console.log('🚀 Starting bot...');
 const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+//console.log('✅ Discord.js imported');
 const axios = require('axios');
+//console.log('✅ Axios imported');
 require('dotenv').config();
+//console.log('✅ .env loaded');
 const { searchMovies, getMovieDetails } = require('./tmdb');
 const config = require('./config');
 
