@@ -3,16 +3,23 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
-    name: Deploy to LXC Server
+    name: Deploy to Discord Bots VM
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_SECRET }}
+          tags: tag:ci
       
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -21,7 +28,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/moviebot
+            cd /opt/bots/moviebot
             echo "📥 Pulling latest code..."
             git pull origin main
             
