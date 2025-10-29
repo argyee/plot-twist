@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/bots/moviebot
+            cd /opt/moviebot
             echo "📥 Pulling latest code..."
             git fetch origin master
             git reset --hard origin/master
@@ -38,7 +38,7 @@ jobs:
 
             echo "🔄 Restarting bot with new structure..."
             pm2 delete moviebot 2>/dev/null || true
-            pm2 start src/bot.js --name moviebot
+            pm2 start /opt/moviebot/src/bot.js --name moviebot
             pm2 save
 
             # Ensure PM2 starts on system reboot
