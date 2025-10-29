@@ -1,6 +1,7 @@
 // Database setup and queries using better-sqlite3
 const Database = require("better-sqlite3");
 const path = require("path");
+const fs = require("fs");
 
 // Determine database path based on NODE_ENV
 // Store database files in data/ directory at project root
@@ -10,6 +11,13 @@ const dbPath =
     : path.join(__dirname, "..", "..", "data", "movies_dev.db");
 
 console.log(`📁 Using database: ${dbPath}`);
+
+// Ensure data directory exists
+const dataDir = path.dirname(dbPath);
+if (!fs.existsSync(dataDir)) {
+  console.log(`📁 Creating data directory: ${dataDir}`);
+  fs.mkdirSync(dataDir, { recursive: true });
+}
 
 // Initialize database
 const db = new Database(dbPath);
