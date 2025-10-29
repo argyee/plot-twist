@@ -31,6 +31,14 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
   - Public messages so everyone can see the trolling
   - See [BULLYING_SETUP.md](BULLYING_SETUP.md) for details
 
+ ## Preview
+
+  <img width="1966" height="1272" alt="CleanShot 2025-10-29 at 17 58 36@2x" src="https://github.com/user-attachments/assets/0d18cf79-9675-482f-81cf-ea3aacd27764" />
+  <img width="1546" height="1156" alt="CleanShot 2025-10-29 at 17 57 37@2x" src="https://github.com/user-attachments/assets/66e24f07-44a2-4130-b925-3c1e6ce424da" />
+
+
+
+
 ## Prerequisites
 
 - Node.js (v16 or higher)
