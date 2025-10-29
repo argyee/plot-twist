@@ -3,7 +3,7 @@
  * Handles watch party organization and Discord event creation
  */
 
-const { ButtonStyle } = require("discord.js");
+const { ButtonStyle, ButtonInteraction } = require("discord.js");
 const {
   watchPartyExists,
   getUsersWantingToWatch,
@@ -18,7 +18,7 @@ const { processBulliedButtonPress } = require("../../services/bullying");
 /**
  * Handle "Organize Watch Party" button clicks
  * Creates a Discord event for coordinating watch parties
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleWatchPartyButton(interaction) {
   try {

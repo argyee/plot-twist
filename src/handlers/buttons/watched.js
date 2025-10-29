@@ -3,6 +3,7 @@
  * Handles "Watched" button clicks for tracking watched movies
  */
 
+const { ButtonInteraction } = require("discord.js");
 const {
   addToWatchlist,
   removeFromWatchlist,
@@ -16,7 +17,7 @@ const { processBulliedButtonPress } = require("../../services/bullying");
 /**
  * Handle "Watched" button clicks
  * Toggles movie in user's watched list and adds reaction
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleWatchedButton(interaction) {
   try {

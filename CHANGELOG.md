@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-01-29
+
+### Added
+
+- **Comprehensive test suite for Priority components** (Services & Utilities)
+  - `tests/database.test.js` - Complete test coverage for all 10 database functions
+    - Tests watchlist operations (add, remove, check, get)
+    - Tests movie queries and status counts
+    - Tests watch party operations (create, update, check existence)
+    - Uses in-memory SQLite (`:memory:`) for isolated test database
+    - 50+ test cases covering edge cases and error scenarios
+  - `tests/bullying.test.js` - Comprehensive cooldown and state management tests
+    - Tests universal button press tracking across all button types
+    - Tests 30-minute cooldown logic with time mocking
+    - Tests first/second/third press flow
+    - Tests cooldown expiry and reset functionality
+    - 20+ test cases including boundary conditions
+  - `tests/tmdb.test.js` - TMDB API integration tests with mocked axios
+    - Tests `searchMovies` with various inputs and error handling
+    - Tests `getMovieDetails` data transformation
+    - Tests handling of missing optional fields (cast, director, trailer, poster)
+    - Tests top-5 cast limit and YouTube trailer filtering
+    - 25+ test cases covering API success and failure scenarios
+  - `tests/buttonBuilder.test.js` - Dynamic button creation logic tests
+    - Tests basic button creation (Watched, Want to Watch, Delete)
+    - Tests optional button logic (IMDB, Trailer)
+    - Tests watch party button threshold logic (3+ interested)
+    - Tests 5-button limit constraint (Trailer hides when Watch Party shows)
+    - Tests correct customId format and button styles
+    - 30+ test cases covering all button combinations
+  - ~40-50% code coverage achieved for critical business logic
+
+### Changed
+
+- **CI/CD Pipeline Improvements**
+  - Combined separate CI and Deploy workflows into unified `ci-cd.yml` pipeline
+  - Added `paths-ignore` to skip deployment for documentation-only changes
+    - Prevents unnecessary bot restarts when updating README, CHANGELOG, docs
+    - Only deploys when actual code changes (src/, package.json, etc.)
+  - Deploy job now depends on tests passing (no deployment if tests fail)
+  - Added test coverage reporting with Codecov integration (optional)
+  - Added Discord webhook notifications for all pipeline events:
+    - Test success/failure notifications
+    - Deployment started/success/failure notifications
+    - Includes commit message, author, and links to failed runs
+  - Setup guide created at `DISCORD_WEBHOOK_SETUP.md`
+- Improved JSDoc type annotations for better IDE support and type safety
+  - Updated all interaction handlers to use specific Discord.js v14 interaction types
+  - Slash command handlers now use `ChatInputCommandInteraction` instead of generic `Interaction`
+  - Autocomplete handler now uses `AutocompleteInteraction`
+  - Button handlers now use `ButtonInteraction`
+  - Added proper type imports from `discord.js` to all handler files
+  - Provides better autocomplete and catches type errors earlier in development
+
 ## [1.1.0] - 2025-01-29
 
 ### Added

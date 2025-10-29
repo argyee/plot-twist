@@ -3,7 +3,7 @@
  * Allows administrators to set/unset the bullied user
  */
 
-const { PermissionFlagsBits } = require("discord.js");
+const { PermissionFlagsBits, ChatInputCommandInteraction } = require("discord.js");
 const {
   setBulliedUser,
   getBulliedUser,
@@ -13,7 +13,7 @@ const {
 
 /**
  * Handle /bully command
- * @param {Interaction} interaction - Discord command interaction
+ * @param {ChatInputCommandInteraction} interaction - Discord command interaction
  */
 async function handleBullyCommand(interaction) {
   // Check if user has Administrator permission

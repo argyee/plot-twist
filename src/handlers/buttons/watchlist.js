@@ -3,6 +3,7 @@
  * Handles "Want to Watch" button clicks with toggle functionality
  */
 
+const { ButtonInteraction } = require("discord.js");
 const {
   addToWatchlist,
   removeFromWatchlist,
@@ -17,7 +18,7 @@ const { processBulliedButtonPress } = require("../../services/bullying");
 /**
  * Handle "Want to Watch" button clicks
  * Toggles user's watchlist status and triggers watch party notification if threshold reached
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleWatchlistButton(interaction) {
   try {

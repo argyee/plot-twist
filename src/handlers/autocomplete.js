@@ -3,11 +3,12 @@
  * Handles movie search autocomplete for /movie command
  */
 
+const { AutocompleteInteraction } = require("discord.js");
 const { searchMovies } = require("../services/tmdb");
 
 /**
  * Handle autocomplete interactions for movie search
- * @param {Interaction} interaction - Discord autocomplete interaction
+ * @param {AutocompleteInteraction} interaction - Discord autocomplete interaction
  */
 async function handleAutocomplete(interaction) {
   const focusedValue = interaction.options.getFocused();

@@ -3,14 +3,14 @@
  * Shows user's watched movies and watchlist
  */
 
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ChatInputCommandInteraction } = require("discord.js");
 const { getUserWatchlist } = require("../services/database");
 const messages = require("../messages");
 
 /**
  * Handle /mywatchlist command
  * Shows user's watched movies and want-to-watch list
- * @param {Interaction} interaction - Discord command interaction
+ * @param {ChatInputCommandInteraction} interaction - Discord command interaction
  */
 async function handleWatchlistCommand(interaction) {
   await interaction.deferReply({ ephemeral: true });

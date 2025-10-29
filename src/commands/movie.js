@@ -3,7 +3,7 @@
  * Creates movie discussion posts in forum channel
  */
 
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ChatInputCommandInteraction } = require("discord.js");
 const { getMovieDetails } = require("../services/tmdb");
 const { buildMovieButtons } = require("../utils/buttonBuilder");
 const config = require("../services/config");
@@ -41,7 +41,7 @@ function getTagIds(channel, genreIds) {
 /**
  * Handle /movie command
  * Creates a movie discussion post in the forum channel
- * @param {Interaction} interaction - Discord command interaction
+ * @param {ChatInputCommandInteraction} interaction - Discord command interaction
  * @param {Client} client - Discord client instance
  */
 async function handleMovieCommand(interaction, client) {

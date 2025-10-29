@@ -3,14 +3,14 @@
  * Handles delete confirmation flow for movie posts
  */
 
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction } = require("discord.js");
 const messages = require("../../messages");
 const { processBulliedButtonPress } = require("../../services/bullying");
 
 /**
  * Handle delete button clicks
  * Shows confirmation dialog before deleting
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleDeleteButton(interaction) {
   try {
@@ -71,7 +71,7 @@ async function handleDeleteButton(interaction) {
 /**
  * Handle delete confirmation button
  * Actually deletes the forum thread
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleConfirmDelete(interaction) {
   try {
@@ -101,7 +101,7 @@ async function handleConfirmDelete(interaction) {
 /**
  * Handle delete cancellation button
  * Cancels the delete operation
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleCancelDelete(interaction) {
   try {

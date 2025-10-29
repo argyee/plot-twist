@@ -3,6 +3,7 @@
  * Routes button clicks to appropriate handlers
  */
 
+const { ButtonInteraction } = require("discord.js");
 const handleWatchedButton = require("./watched");
 const handleWatchlistButton = require("./watchlist");
 const handleWatchPartyButton = require("./watchParty");
@@ -14,7 +15,7 @@ const {
 
 /**
  * Route button interactions to appropriate handler based on customId
- * @param {Interaction} interaction - Discord button interaction
+ * @param {ButtonInteraction} interaction - Discord button interaction
  */
 async function handleButtonInteraction(interaction) {
   const customId = interaction.customId;
