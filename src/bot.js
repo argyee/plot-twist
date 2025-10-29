@@ -4,7 +4,7 @@
  */
 
 const { Client, GatewayIntentBits } = require("discord.js");
-require("dotenv").config();
+require("dotenv").config({ override: true });
 
 // Event handlers
 const handleReady = require("./events/ready");
