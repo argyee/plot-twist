@@ -22,7 +22,7 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
   - Creates Discord Scheduled Event
   - Dynamic interest counter
   - Prevents duplicate watch parties
-- 😈 **Button Bullying System** (Admin Only):
+- 😈 **Button Bullying System**:
   - Set which user to bully dynamically with `/bully` commands
   - Bullied users must click ANY buttons 3 times before they work
   - Personalized bully messages with username
