@@ -9,18 +9,18 @@ jobs:
   deploy:
     name: Deploy to Discord Bots VM
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Tailscale
         uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-      
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -30,13 +30,15 @@ jobs:
           script: |
             cd /opt/bots/moviebot
             echo "📥 Pulling latest code..."
-            git pull origin main
-            
+            git pull origin master
+
             echo "📦 Installing dependencies..."
             npm ci
-            
-            echo "🔄 Restarting bot..."
-            pm2 restart moviebot
-            
+
+            echo "🔄 Restarting bot with new structure..."
+            pm2 delete moviebot 2>/dev/null || true
+            pm2 start src/bot.js --name moviebot
+            pm2 save
+
             echo "✅ Deployment complete!"
             pm2 status moviebot
