@@ -138,9 +138,9 @@ module.exports = {
   overseerr: {
     // Linking messages
     notLinked:
-      "❌ Δεν έχεις συνδέσει τον λογαριασμό σου στο Plex! Ζήτα από έναν admin να συνδέσει τον λογαριασμό σου με `/overseerr link`.",
+      "❌ Δεν έχεις συνδέσει τον λογαριασμό σου στο Plex! Ζήτα από έναν admin να συνδέσει τον λογαριασμό σου.",
     notLinkedUser: (username) =>
-      `❌ Ο ${username} δεν είναι συνδεδεμένος με λογαριασμό Overseerr.`,
+      `❌ Ο ${username} δεν είναι συνδεδεμένος με λογαριασμό στο Overseerr.`,
     alreadyLinked: (username, overseerUsername) =>
       `❌ Ο ${username} είναι ήδη συνδεδεμένος με τον λογαριασμό Overseerr: **${overseerUsername}**`,
     linkSuccess: (username, overseerUsername) =>
@@ -154,7 +154,7 @@ module.exports = {
 
     // Request messages
     requestSuccess: (title, is4k) =>
-      `✅ Η **${title}** ζητήθηκε${is4k ? " σε 4K" : ""}! Θα ειδοποιηθείς όταν είναι διαθέσιμη.`,
+      `✅ Η ταινία **${title}** ζητήθηκε${is4k ? " σε 4K" : ""}! Θα ειδοποιηθείς όταν είναι διαθέσιμη.`,
     requestFailed: (error) => `❌ Αποτυχία αιτήματος: ${error}`,
     alreadyAvailable: "🟢 Αυτή η ταινία είναι ήδη διαθέσιμη στο Plex!",
     alreadyRequested:
