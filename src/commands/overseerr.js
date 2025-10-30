@@ -132,9 +132,10 @@ async function handleLink(interaction) {
       ),
     });
 
-    console.log(
-      `[OVERSEERR] Linked ${targetUser.tag} to Overseerr user ${overseerUser.displayName} (ID: ${overseerUser.id})`
-    );
+    // TODO: Replace with proper logging utility
+    // console.log(
+    //   `[OVERSEERR] Linked ${targetUser.tag} to Overseerr user ${overseerUser.displayName} (ID: ${overseerUser.id})`
+    // );
   } else {
     await interaction.editReply({
       content: messages.overseerr.linkFailed,
@@ -165,9 +166,10 @@ async function handleUnlink(interaction) {
       content: messages.overseerr.unlinkSuccess(targetUser.tag),
     });
 
-    console.log(
-      `[OVERSEERR] Unlinked ${targetUser.tag} from Overseerr user ${link.overseerr_username}`
-    );
+    // TODO: Replace with proper logging utility
+    // console.log(
+    //   `[OVERSEERR] Unlinked ${targetUser.tag} from Overseerr user ${link.overseerr_username}`
+    // );
   } else {
     await interaction.editReply({
       content: messages.overseerr.unlinkFailed,

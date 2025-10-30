@@ -222,17 +222,22 @@ function getOverseerLink(discordUserId) {
     WHERE discord_user_id = ?
   `);
 
-  return stmt.get(discordUserId);
+  return stmt.get(discordUserId) || null;
 }
 
 // Remove Overseerr link
 function unlinkOverseerAccount(discordUserId) {
-  const stmt = db.prepare(`
-    DELETE FROM overseerr_links WHERE discord_user_id = ?
-  `);
+  try {
+    const stmt = db.prepare(`
+      DELETE FROM overseerr_links WHERE discord_user_id = ?
+    `);
 
-  const result = stmt.run(discordUserId);
-  return result.changes > 0;
+    stmt.run(discordUserId);
+    return true;
+  } catch (error) {
+    console.error("[DATABASE] Error unlinking Overseerr account:", error);
+    return false;
+  }
 }
 
 // Get all Overseerr links

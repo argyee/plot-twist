@@ -389,4 +389,213 @@ describe("Button Builder", () => {
       ]);
     });
   });
+
+  describe("buildMovieButtons - Overseerr Integration", () => {
+    const overseerr = require("../src/services/overseerr");
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      database.getMovieStatusCount.mockReturnValue(0);
+      database.watchPartyExists.mockReturnValue(false);
+    });
+
+    test("should show 'Available on Plex' button when movie is available", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: true,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      // Watched, Want to Watch, Delete, IMDB, Available on Plex
+      expect(row.components).toHaveLength(5);
+      const availableButton = row.components[4];
+      expect(availableButton.data.label).toBe("Available on Plex");
+      expect(availableButton.data.disabled).toBe(true);
+      expect(availableButton.data.style).toBe(3); // Success (green)
+      expect(availableButton.data.emoji.name).toBe("🟢");
+    });
+
+    test("should show 'Request Pending' button when movie is requested", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: false,
+        requested: true,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      const pendingButton = row.components[4];
+      expect(pendingButton.data.label).toBe("Request Pending");
+      expect(pendingButton.data.disabled).toBe(true);
+      expect(pendingButton.data.style).toBe(2); // Secondary (gray)
+      expect(pendingButton.data.emoji.name).toBe("🟡");
+    });
+
+    test("should show 'Request Pending' button when movie is processing", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: false,
+        requested: false,
+        processing: true,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      const pendingButton = row.components[4];
+      expect(pendingButton.data.label).toBe("Request Pending");
+      expect(pendingButton.data.disabled).toBe(true);
+    });
+
+    test("should show clickable 'Request on Plex' button when not available/requested", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: false,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      const requestButton = row.components[4];
+      expect(requestButton.data.label).toBe("Request on Plex");
+      expect(requestButton.data.disabled).toBeUndefined(); // Not disabled
+      expect(requestButton.data.style).toBe(1); // Primary (blue)
+      expect(requestButton.data.emoji.name).toBe("📥");
+      expect(requestButton.data.custom_id).toBe("request_550");
+    });
+
+    test("should not add Overseerr button when not configured", () => {
+      overseerr.isConfigured.mockReturnValue(false);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: true,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      // Should only have: Watched, Want to Watch, Delete, IMDB (no Overseerr button)
+      expect(row.components).toHaveLength(4);
+      expect(row.components.every((btn) => !btn.data.label?.includes("Plex"))).toBe(true);
+    });
+
+    test("should not add Overseerr button when overseerStatus is null", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, null);
+
+      // Should only have: Watched, Want to Watch, Delete, IMDB
+      expect(row.components).toHaveLength(4);
+      expect(row.components.every((btn) => !btn.data.label?.includes("Plex"))).toBe(true);
+    });
+
+    test("should respect 5 button limit with Overseerr + Watch Party + IMDB", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+      database.getMovieStatusCount.mockReturnValue(5); // Watch party threshold reached
+      database.watchPartyExists.mockReturnValue(false);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: false,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      // Should have exactly 5 buttons (Discord limit)
+      expect(row.components).toHaveLength(5);
+      // Watched, Want to Watch, Delete, IMDB, Request on Plex
+      // (Watch Party button is hidden because we're at the 5-button limit)
+      expect(row.components.map((b) => b.data.label)).toEqual([
+        "Watched",
+        "Want to Watch",
+        "Delete Post",
+        "IMDB",
+        "Request on Plex",
+      ]);
+    });
+
+    test("should prioritize Overseerr button over Watch Party when both conditions met", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+      database.getMovieStatusCount.mockReturnValue(5); // Watch party threshold
+      database.watchPartyExists.mockReturnValue(false);
+
+      const movie = {
+        imdbUrl: "https://www.imdb.com/title/tt0137523/",
+      };
+
+      const overseerStatus = {
+        available: true,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      // When at 5-button limit, Overseerr takes priority over Watch Party
+      expect(row.components).toHaveLength(5);
+      expect(row.components[4].data.label).toBe("Available on Plex");
+    });
+
+    test("should show both Overseerr and Watch Party buttons when IMDB is missing", () => {
+      overseerr.isConfigured.mockReturnValue(true);
+      database.getMovieStatusCount.mockReturnValue(5);
+      database.watchPartyExists.mockReturnValue(false);
+
+      const movie = {
+        imdbUrl: null, // No IMDB link
+      };
+
+      const overseerStatus = {
+        available: false,
+        requested: false,
+        processing: false,
+      };
+
+      const row = buildMovieButtons("550", "user123", movie, overseerStatus);
+
+      // Watched, Want to Watch, Delete, Request on Plex, Watch Party
+      // (With only 4 buttons before, both Overseerr and Watch Party fit within the 5-button limit)
+      expect(row.components).toHaveLength(5);
+      expect(row.components[3].data.label).toBe("Request on Plex");
+      expect(row.components[4].data.label).toBe("Organize Watch Party (5 interested)");
+    });
+  });
 });

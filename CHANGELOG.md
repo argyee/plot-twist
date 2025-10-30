@@ -23,12 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Discord users linked to Overseerr/Plex accounts via database
   - Full English and Greek localization for all features
   - Integration with existing button bullying system
+- **Comprehensive test suite for Overseerr integration** (~60 new tests):
+  - Complete coverage of Overseerr service functions (getMovieStatus, createMovieRequest, etc.)
+  - Database Overseerr link operations tests
+  - Button state tests for all Overseerr button variations
+  - All 159 tests passing
 
 ### Changed
 
 - Removed Trailer button from movie posts (replaced with Request button)
 - Updated button builder logic to accommodate Overseerr status
 - Movie posts now show availability status in embed footer when Overseerr is configured
+- Commented out verbose debug logs (prepared for future logging utility)
+- Improved database function return types (getOverseerLink returns null, unlinkOverseerAccount returns true)
 
 ## [1.1.2] - 2025-10-30
 

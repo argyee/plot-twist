@@ -155,9 +155,10 @@ async function handleRequestModal(interaction) {
       content: messages.overseerr.requestSuccess(movieTitle, is4k),
     });
 
-    console.log(
-      `[OVERSEERR] Request created: ${movieTitle} by ${interaction.user.tag}${is4k ? " (4K)" : ""}`
-    );
+    // TODO: Replace with proper logging utility
+    // console.log(
+    //   `[OVERSEERR] Request created: ${movieTitle} by ${interaction.user.tag}${is4k ? " (4K)" : ""}`
+    // );
   } else {
     await interaction.editReply({
       content: messages.overseerr.requestFailed(result.error),
@@ -215,9 +216,10 @@ async function handleQuickRequestModal(interaction) {
       content: messages.overseerr.requestSuccess(movieTitle, is4k),
     });
 
-    console.log(
-      `[OVERSEERR] Quick request created: ${movieTitle} by ${interaction.user.tag}${is4k ? " (4K)" : ""}`
-    );
+    // TODO: Replace with proper logging utility
+    // console.log(
+    //   `[OVERSEERR] Quick request created: ${movieTitle} by ${interaction.user.tag}${is4k ? " (4K)" : ""}`
+    // );
   } else {
     await interaction.editReply({
       content: messages.overseerr.requestFailed(result.error),

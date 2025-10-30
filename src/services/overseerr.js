@@ -36,11 +36,13 @@ async function getMovieStatus(tmdbId) {
   }
 
   try {
-    console.log(`[OVERSEERR] Checking status for TMDB ID: ${tmdbId}`);
+    // TODO: Replace with proper logging utility
+    // console.log(`[OVERSEERR] Checking status for TMDB ID: ${tmdbId}`);
     const response = await api.get(`/api/v1/movie/${tmdbId}`);
     const mediaInfo = response.data.mediaInfo;
 
-    console.log(`[OVERSEERR] Response for ${tmdbId}:`, JSON.stringify(response.data, null, 2));
+    // TODO: Replace with proper logging utility
+    // console.log(`[OVERSEERR] Response for ${tmdbId}:`, JSON.stringify(response.data, null, 2));
 
     // Status codes: 1=UNKNOWN, 2=PENDING, 3=PROCESSING, 4=AVAILABLE, 5=PARTIALLY_AVAILABLE
     const status = mediaInfo?.status || 0;
@@ -50,7 +52,8 @@ async function getMovieStatus(tmdbId) {
     const isAvailable = status === 4 || status === 5;
     const is4kAvailable = status4k === 4 || status4k === 5;
 
-    console.log(`[OVERSEERR] Status for ${tmdbId}: status=${status}, status4k=${status4k}, available=${isAvailable}`);
+    // TODO: Replace with proper logging utility
+    // console.log(`[OVERSEERR] Status for ${tmdbId}: status=${status}, status4k=${status4k}, available=${isAvailable}`);
 
     return {
       available: isAvailable,
@@ -64,7 +67,8 @@ async function getMovieStatus(tmdbId) {
   } catch (error) {
     if (error.response?.status === 404) {
       // Movie not in Overseerr system yet
-      console.log(`[OVERSEERR] Movie ${tmdbId} not found in Overseerr (404)`);
+      // TODO: Replace with proper logging utility
+      // console.log(`[OVERSEERR] Movie ${tmdbId} not found in Overseerr (404)`);
       return { available: false, requested: false, processing: false };
     }
     console.error(
@@ -98,9 +102,10 @@ async function createMovieRequest(tmdbId, overseerUserId, is4k = false) {
       userId: parseInt(overseerUserId),
     });
 
-    console.log(
-      `[OVERSEERR] Request created for TMDB ${tmdbId} by user ${overseerUserId}${is4k ? " (4K)" : ""}`
-    );
+    // TODO: Replace with proper logging utility
+    // console.log(
+    //   `[OVERSEERR] Request created for TMDB ${tmdbId} by user ${overseerUserId}${is4k ? " (4K)" : ""}`
+    // );
 
     return {
       success: true,
@@ -175,7 +180,8 @@ async function deleteRequest(requestId) {
 
   try {
     await api.delete(`/api/v1/request/${requestId}`);
-    console.log(`[OVERSEERR] Request ${requestId} deleted`);
+    // TODO: Replace with proper logging utility
+    // console.log(`[OVERSEERR] Request ${requestId} deleted`);
     return { success: true };
   } catch (error) {
     console.error(
