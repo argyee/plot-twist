@@ -96,7 +96,7 @@ async function handleRequestModal(interaction) {
 
   const movieId = interaction.customId.split("_")[2];
   const userId = interaction.user.id;
-  const qualityInput = interaction.fields.getTextInput("quality").toLowerCase();
+  const qualityInput = interaction.fields.getTextInputValue("quality").toLowerCase();
   const is4k = qualityInput === "4k";
 
   // Get user's Overseerr link
