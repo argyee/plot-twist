@@ -36,16 +36,25 @@ async function getMovieStatus(tmdbId) {
   }
 
   try {
+    console.log(`[OVERSEERR] Checking status for TMDB ID: ${tmdbId}`);
     const response = await api.get(`/api/v1/movie/${tmdbId}`);
     const mediaInfo = response.data.mediaInfo;
+
+    console.log(`[OVERSEERR] Response for ${tmdbId}:`, JSON.stringify(response.data, null, 2));
 
     // Status codes: 1=UNKNOWN, 2=PENDING, 3=PROCESSING, 4=AVAILABLE, 5=PARTIALLY_AVAILABLE
     const status = mediaInfo?.status || 0;
     const status4k = mediaInfo?.status4k || 0;
 
+    // Consider both AVAILABLE (4) and PARTIALLY_AVAILABLE (5) as available
+    const isAvailable = status === 4 || status === 5;
+    const is4kAvailable = status4k === 4 || status4k === 5;
+
+    console.log(`[OVERSEERR] Status for ${tmdbId}: status=${status}, status4k=${status4k}, available=${isAvailable}`);
+
     return {
-      available: status === 4,
-      available4k: status4k === 4,
+      available: isAvailable,
+      available4k: is4kAvailable,
       requested: status >= 2 && status < 4,
       requested4k: status4k >= 2 && status4k < 4,
       processing: status === 3,
@@ -55,6 +64,7 @@ async function getMovieStatus(tmdbId) {
   } catch (error) {
     if (error.response?.status === 404) {
       // Movie not in Overseerr system yet
+      console.log(`[OVERSEERR] Movie ${tmdbId} not found in Overseerr (404)`);
       return { available: false, requested: false, processing: false };
     }
     console.error(
