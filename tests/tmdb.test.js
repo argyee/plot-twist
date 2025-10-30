@@ -3,15 +3,22 @@
  * Tests TMDB API integration with mocked axios calls
  */
 
+// Mock dotenv to prevent loading .env file
+jest.mock("dotenv", () => ({
+  config: jest.fn(),
+}));
+
+// Set test environment variables BEFORE requiring tmdb
+process.env.TMDB_API_KEY = "test_api_key";
+process.env.TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+
 const axios = require("axios");
-const tmdb = require("../src/services/tmdb");
 
 // Mock axios
 jest.mock("axios");
 
-// Mock environment variables
-process.env.TMDB_API_KEY = "test_api_key";
-process.env.TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+// Now require tmdb (it will use test environment variables)
+const tmdb = require("../src/services/tmdb");
 
 describe("TMDB Service", () => {
   beforeEach(() => {

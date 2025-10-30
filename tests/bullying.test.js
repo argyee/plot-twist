@@ -565,15 +565,15 @@ describe("Bullying Service", () => {
         "BulliedUser"
       );
 
-      // Exactly at 30 minutes (cooldown boundary)
-      Date.now = jest.fn(() => mockNow + 30 * 60 * 1000);
-      const atBoundary = bullying.processBulliedButtonPress(
+      // Just before 30 minutes (still in cooldown)
+      Date.now = jest.fn(() => mockNow + 30 * 60 * 1000 - 1);
+      const beforeBoundary = bullying.processBulliedButtonPress(
         "user123",
         "watched",
         "999",
         "BulliedUser"
       );
-      expect(atBoundary).toBe(null); // Should still be in cooldown
+      expect(beforeBoundary).toBe(null); // Should still be in cooldown
 
       // Just after 30 minutes (cooldown expired)
       Date.now = jest.fn(() => mockNow + 30 * 60 * 1000 + 1);

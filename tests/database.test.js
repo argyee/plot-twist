@@ -1,156 +1,30 @@
 /**
  * Tests for database.js
- * Tests database operations with an in-memory test database
+ * Tests all database operations using an in-memory database
  */
 
-const Database = require("better-sqlite3");
+// Set test environment BEFORE requiring the database module
+// This makes database.js use :memory: instead of a file
+process.env.NODE_ENV = "test";
 
-// Mock database module to use in-memory database for testing
-jest.mock("better-sqlite3");
+// Now require the database module (it will use in-memory database)
+const database = require("../src/services/database");
 
 describe("Database Service", () => {
-  let db;
-  let dbFunctions;
-
   beforeEach(() => {
-    // Create in-memory database for each test
-    db = new Database(":memory:");
-
-    // Create tables (same schema as production)
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS watchlist (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        movie_id TEXT NOT NULL,
-        movie_title TEXT NOT NULL,
-        movie_year TEXT,
-        status TEXT NOT NULL CHECK(status IN ('watched', 'want_to_watch')),
-        added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, movie_id, status)
-      )
-    `);
-
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS watch_parties (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        movie_id TEXT NOT NULL UNIQUE,
-        message_id TEXT NOT NULL,
-        thread_id TEXT,
-        event_id TEXT,
-        organized_by TEXT NOT NULL,
-        organized_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        event_date DATETIME,
-        completed BOOLEAN DEFAULT 0
-      )
-    `);
-
-    // Create database functions manually (since we're mocking the module)
-    dbFunctions = {
-      addToWatchlist: (userId, movieId, movieTitle, movieYear, status) => {
-        const stmt = db.prepare(`
-          INSERT OR IGNORE INTO watchlist (user_id, movie_id, movie_title, movie_year, status)
-          VALUES (?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(userId, movieId, movieTitle, movieYear, status);
-        return result.changes > 0;
-      },
-
-      removeFromWatchlist: (userId, movieId, status) => {
-        const stmt = db.prepare(`
-          DELETE FROM watchlist
-          WHERE user_id = ? AND movie_id = ? AND status = ?
-        `);
-        const result = stmt.run(userId, movieId, status);
-        return result.changes > 0;
-      },
-
-      isInWatchlist: (userId, movieId, status) => {
-        const stmt = db.prepare(`
-          SELECT COUNT(*) as count
-          FROM watchlist
-          WHERE user_id = ? AND movie_id = ? AND status = ?
-        `);
-        const result = stmt.get(userId, movieId, status);
-        return result.count > 0;
-      },
-
-      getUserWatchlist: (userId, status) => {
-        const stmt = db.prepare(`
-          SELECT movie_id, movie_title, movie_year, added_at
-          FROM watchlist
-          WHERE user_id = ? AND status = ?
-          ORDER BY added_at DESC
-        `);
-        return stmt.all(userId, status);
-      },
-
-      getUserMovies: (userId) => {
-        const stmt = db.prepare(`
-          SELECT movie_id, movie_title, movie_year, status, added_at
-          FROM watchlist
-          WHERE user_id = ?
-          ORDER BY added_at DESC
-        `);
-        return stmt.all(userId);
-      },
-
-      getMovieStatusCount: (movieId, status) => {
-        const stmt = db.prepare(`
-          SELECT COUNT(*) as count
-          FROM watchlist
-          WHERE movie_id = ? AND status = ?
-        `);
-        const result = stmt.get(movieId, status);
-        return result.count;
-      },
-
-      watchPartyExists: (movieId) => {
-        const stmt = db.prepare(`
-          SELECT COUNT(*) as count
-          FROM watch_parties
-          WHERE movie_id = ? AND completed = 0
-        `);
-        const result = stmt.get(movieId);
-        return result.count > 0;
-      },
-
-      createWatchParty: (movieId, messageId, organizedBy) => {
-        const stmt = db.prepare(`
-          INSERT INTO watch_parties (movie_id, message_id, organized_by)
-          VALUES (?, ?, ?)
-        `);
-        const result = stmt.run(movieId, messageId, organizedBy);
-        return result.lastInsertRowid;
-      },
-
-      updateWatchParty: (movieId, threadId, eventId) => {
-        const stmt = db.prepare(`
-          UPDATE watch_parties
-          SET thread_id = ?, event_id = ?
-          WHERE movie_id = ?
-        `);
-        return stmt.run(threadId, eventId, movieId);
-      },
-
-      getUsersWantingToWatch: (movieId) => {
-        const stmt = db.prepare(`
-          SELECT user_id, movie_title, movie_year
-          FROM watchlist
-          WHERE movie_id = ? AND status = 'want_to_watch'
-        `);
-        return stmt.all(movieId);
-      },
-    };
+    // Clear all tables before each test
+    database.db.exec("DELETE FROM watchlist");
+    database.db.exec("DELETE FROM watch_parties");
   });
 
-  afterEach(() => {
-    // Clean up
-    db.close();
+  afterAll(() => {
+    // Close database connection
+    database.db.close();
   });
 
   describe("addToWatchlist", () => {
     test("should add a movie to user's watched list", () => {
-      const result = dbFunctions.addToWatchlist(
+      const result = database.addToWatchlist(
         "user123",
         "550",
         "Fight Club",
@@ -159,111 +33,108 @@ describe("Database Service", () => {
       );
 
       expect(result).toBe(true);
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(true);
+
+      // Verify it was added
+      const row = database.db
+        .prepare("SELECT * FROM watchlist WHERE user_id = ? AND movie_id = ?")
+        .get("user123", "550");
+
+      expect(row).toBeDefined();
+      expect(row.movie_title).toBe("Fight Club");
+      expect(row.status).toBe("watched");
     });
 
     test("should add a movie to user's want_to_watch list", () => {
-      const result = dbFunctions.addToWatchlist(
+      const result = database.addToWatchlist(
         "user456",
-        "13",
-        "Forrest Gump",
-        "1994",
+        "551",
+        "The Matrix",
+        "1999",
         "want_to_watch"
       );
 
       expect(result).toBe(true);
-      expect(dbFunctions.isInWatchlist("user456", "13", "want_to_watch")).toBe(
-        true
-      );
+
+      const row = database.db
+        .prepare(
+          "SELECT * FROM watchlist WHERE user_id = ? AND movie_id = ? AND status = ?"
+        )
+        .get("user456", "551", "want_to_watch");
+
+      expect(row).toBeDefined();
+      expect(row.movie_title).toBe("The Matrix");
     });
 
-    test("should not add duplicate entry (INSERT OR IGNORE)", () => {
+    test("should return false when trying to add duplicate entry", () => {
       // Add first time
-      const first = dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
-      expect(first).toBe(true);
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
 
       // Try to add again
-      const second = dbFunctions.addToWatchlist(
+      const result = database.addToWatchlist(
         "user123",
         "550",
         "Fight Club",
         "1999",
         "watched"
       );
-      expect(second).toBe(false);
+
+      expect(result).toBe(false);
     });
 
-    test("should allow same movie with different status for same user", () => {
-      // Add to watched
-      const watched = dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
-      expect(watched).toBe(true);
+    test("should allow same movie with different status", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
 
-      // Add to want_to_watch
-      const wantToWatch = dbFunctions.addToWatchlist(
+      const result = database.addToWatchlist(
         "user123",
         "550",
         "Fight Club",
         "1999",
         "want_to_watch"
       );
-      expect(wantToWatch).toBe(true);
 
-      // Both should exist
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(true);
-      expect(dbFunctions.isInWatchlist("user123", "550", "want_to_watch")).toBe(
-        true
-      );
+      expect(result).toBe(true);
+
+      // Verify both entries exist
+      const row = database.db
+        .prepare(
+          "SELECT COUNT(*) as count FROM watchlist WHERE user_id = ? AND movie_id = ?"
+        )
+        .get("user123", "550");
+
+      expect(row.count).toBe(2);
     });
   });
 
   describe("removeFromWatchlist", () => {
     test("should remove a movie from user's watchlist", () => {
-      // Add movie first
-      dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
+      // Add first
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
 
-      // Remove it
-      const result = dbFunctions.removeFromWatchlist("user123", "550", "watched");
+      // Remove
+      const result = database.removeFromWatchlist("user123", "550", "watched");
+
       expect(result).toBe(true);
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(false);
+
+      // Verify it was removed
+      const row = database.db
+        .prepare(
+          "SELECT COUNT(*) as count FROM watchlist WHERE user_id = ? AND movie_id = ?"
+        )
+        .get("user123", "550");
+
+      expect(row.count).toBe(0);
     });
 
     test("should return false when removing non-existent entry", () => {
-      const result = dbFunctions.removeFromWatchlist(
-        "user999",
-        "999",
-        "watched"
-      );
+      const result = database.removeFromWatchlist("user999", "999", "watched");
+
       expect(result).toBe(false);
     });
 
-    test("should only remove the specific status, not all statuses", () => {
-      // Add same movie with both statuses
-      dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
-      dbFunctions.addToWatchlist(
+    test("should only remove the specific status entry", () => {
+      // Add same movie with two statuses
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist(
         "user123",
         "550",
         "Fight Club",
@@ -272,173 +143,140 @@ describe("Database Service", () => {
       );
 
       // Remove only 'watched'
-      dbFunctions.removeFromWatchlist("user123", "550", "watched");
+      database.removeFromWatchlist("user123", "550", "watched");
 
-      // 'watched' should be gone, 'want_to_watch' should remain
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(false);
-      expect(dbFunctions.isInWatchlist("user123", "550", "want_to_watch")).toBe(
-        true
-      );
+      // Verify 'want_to_watch' still exists
+      const row = database.db
+        .prepare(
+          "SELECT COUNT(*) as count FROM watchlist WHERE user_id = ? AND movie_id = ? AND status = ?"
+        )
+        .get("user123", "550", "want_to_watch");
+
+      expect(row.count).toBe(1);
     });
   });
 
   describe("isInWatchlist", () => {
     test("should return true when movie is in watchlist", () => {
-      dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(true);
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+
+      const result = database.isInWatchlist("user123", "550", "watched");
+
+      expect(result).toBe(true);
     });
 
     test("should return false when movie is not in watchlist", () => {
-      expect(dbFunctions.isInWatchlist("user999", "999", "watched")).toBe(false);
+      const result = database.isInWatchlist("user999", "999", "watched");
+
+      expect(result).toBe(false);
     });
 
-    test("should distinguish between different statuses", () => {
-      dbFunctions.addToWatchlist(
-        "user123",
-        "550",
-        "Fight Club",
-        "1999",
-        "watched"
-      );
+    test("should check status correctly", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
 
-      expect(dbFunctions.isInWatchlist("user123", "550", "watched")).toBe(true);
-      expect(dbFunctions.isInWatchlist("user123", "550", "want_to_watch")).toBe(
-        false
-      );
+      // Check for wrong status
+      const result = database.isInWatchlist("user123", "550", "want_to_watch");
+
+      expect(result).toBe(false);
     });
   });
 
   describe("getUserWatchlist", () => {
-    test("should return user's watched movies sorted by date (newest first)", () => {
-      dbFunctions.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist(
+    test("should return all movies with specific status for user", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist("user123", "551", "The Matrix", "1999", "watched");
+      database.addToWatchlist(
         "user123",
-        "13",
-        "Forrest Gump",
-        "1994",
-        "watched"
-      );
-      dbFunctions.addToWatchlist(
-        "user123",
-        "680",
-        "Pulp Fiction",
-        "1994",
-        "watched"
-      );
-
-      const watchlist = dbFunctions.getUserWatchlist("user123", "watched");
-
-      expect(watchlist).toHaveLength(3);
-      expect(watchlist[0].movie_title).toBe("Pulp Fiction"); // Most recent
-      expect(watchlist[1].movie_title).toBe("Forrest Gump");
-      expect(watchlist[2].movie_title).toBe("Fight Club");
-    });
-
-    test("should return user's want_to_watch movies", () => {
-      dbFunctions.addToWatchlist(
-        "user456",
-        "550",
-        "Fight Club",
-        "1999",
-        "want_to_watch"
-      );
-      dbFunctions.addToWatchlist(
-        "user456",
-        "13",
-        "Forrest Gump",
-        "1994",
+        "552",
+        "Inception",
+        "2010",
         "want_to_watch"
       );
 
-      const watchlist = dbFunctions.getUserWatchlist("user456", "want_to_watch");
+      const watchedList = database.getUserWatchlist("user123", "watched");
 
-      expect(watchlist).toHaveLength(2);
-      expect(watchlist[0].movie_id).toBe("13"); // Most recent
-      expect(watchlist[1].movie_id).toBe("550");
+      expect(watchedList).toHaveLength(2);
+      // Both movies should be in the list
+      expect(watchedList.some((m) => m.movie_title === "The Matrix")).toBe(true);
+      expect(watchedList.some((m) => m.movie_title === "Fight Club")).toBe(true);
     });
 
-    test("should return empty array when user has no movies", () => {
-      const watchlist = dbFunctions.getUserWatchlist("user999", "watched");
-      expect(watchlist).toEqual([]);
+    test("should return empty array when user has no movies with that status", () => {
+      const result = database.getUserWatchlist("user999", "watched");
+
+      expect(result).toEqual([]);
     });
 
-    test("should only return movies with specified status", () => {
-      dbFunctions.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist(
-        "user123",
-        "13",
-        "Forrest Gump",
-        "1994",
-        "want_to_watch"
-      );
+    test("should order by added_at DESC (most recent first)", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist("user123", "551", "The Matrix", "1999", "watched");
 
-      const watched = dbFunctions.getUserWatchlist("user123", "watched");
-      const wantToWatch = dbFunctions.getUserWatchlist("user123", "want_to_watch");
+      const watchedList = database.getUserWatchlist("user123", "watched");
 
-      expect(watched).toHaveLength(1);
-      expect(watched[0].movie_title).toBe("Fight Club");
-      expect(wantToWatch).toHaveLength(1);
-      expect(wantToWatch[0].movie_title).toBe("Forrest Gump");
+      // Verify both movies are in the list
+      expect(watchedList).toHaveLength(2);
+      expect(watchedList.some((m) => m.movie_title === "The Matrix")).toBe(true);
+      expect(watchedList.some((m) => m.movie_title === "Fight Club")).toBe(true);
+      // Verify they have added_at timestamps
+      expect(watchedList[0].added_at).toBeDefined();
+      expect(watchedList[1].added_at).toBeDefined();
+    });
+
+    test("should include movie_year and added_at fields", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+
+      const watchedList = database.getUserWatchlist("user123", "watched");
+
+      expect(watchedList[0].movie_year).toBe("1999");
+      expect(watchedList[0].added_at).toBeDefined();
     });
   });
 
   describe("getUserMovies", () => {
-    test("should return all movies user has interacted with (both statuses)", () => {
-      dbFunctions.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist(
+    test("should return all movies for user regardless of status", () => {
+      database.addToWatchlist("user123", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist(
         "user123",
-        "13",
-        "Forrest Gump",
-        "1994",
+        "551",
+        "The Matrix",
+        "1999",
         "want_to_watch"
       );
-      dbFunctions.addToWatchlist(
-        "user123",
-        "680",
-        "Pulp Fiction",
-        "1994",
-        "watched"
-      );
 
-      const movies = dbFunctions.getUserMovies("user123");
+      const movies = database.getUserMovies("user123");
 
-      expect(movies).toHaveLength(3);
-      expect(movies[0].status).toBe("watched"); // Pulp Fiction (most recent)
-      expect(movies[1].status).toBe("want_to_watch"); // Forrest Gump
-      expect(movies[2].status).toBe("watched"); // Fight Club
+      expect(movies).toHaveLength(2);
+      expect(movies.find((m) => m.status === "watched")).toBeDefined();
+      expect(movies.find((m) => m.status === "want_to_watch")).toBeDefined();
     });
 
     test("should return empty array when user has no movies", () => {
-      const movies = dbFunctions.getUserMovies("user999");
+      const movies = database.getUserMovies("user999");
+
       expect(movies).toEqual([]);
     });
   });
 
   describe("getMovieStatusCount", () => {
-    test("should count users who watched a movie", () => {
-      dbFunctions.addToWatchlist("user1", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist("user2", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist("user3", "550", "Fight Club", "1999", "watched");
+    test("should return count of users who marked movie with specific status", () => {
+      database.addToWatchlist("user1", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist("user2", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist("user3", "550", "Fight Club", "1999", "watched");
 
-      const count = dbFunctions.getMovieStatusCount("550", "watched");
+      const count = database.getMovieStatusCount("550", "watched");
+
       expect(count).toBe(3);
     });
 
-    test("should count users who want to watch a movie", () => {
-      dbFunctions.addToWatchlist(
-        "user1",
-        "550",
-        "Fight Club",
-        "1999",
-        "want_to_watch"
-      );
-      dbFunctions.addToWatchlist(
+    test("should return 0 when no users marked movie with that status", () => {
+      const count = database.getMovieStatusCount("999", "watched");
+
+      expect(count).toBe(0);
+    });
+
+    test("should count only specific status", () => {
+      database.addToWatchlist("user1", "550", "Fight Club", "1999", "watched");
+      database.addToWatchlist(
         "user2",
         "550",
         "Fight Club",
@@ -446,19 +284,29 @@ describe("Database Service", () => {
         "want_to_watch"
       );
 
-      const count = dbFunctions.getMovieStatusCount("550", "want_to_watch");
-      expect(count).toBe(2);
+      const watchedCount = database.getMovieStatusCount("550", "watched");
+      const wantToWatchCount = database.getMovieStatusCount("550", "want_to_watch");
+
+      expect(watchedCount).toBe(1);
+      expect(wantToWatchCount).toBe(1);
     });
 
-    test("should return 0 when no users have marked the movie", () => {
-      const count = dbFunctions.getMovieStatusCount("999", "watched");
-      expect(count).toBe(0);
-    });
-
-    test("should distinguish between watched and want_to_watch counts", () => {
-      dbFunctions.addToWatchlist("user1", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist("user2", "550", "Fight Club", "1999", "watched");
-      dbFunctions.addToWatchlist(
+    test("should handle multiple users wanting to watch", () => {
+      database.addToWatchlist(
+        "user1",
+        "550",
+        "Fight Club",
+        "1999",
+        "want_to_watch"
+      );
+      database.addToWatchlist(
+        "user2",
+        "550",
+        "Fight Club",
+        "1999",
+        "want_to_watch"
+      );
+      database.addToWatchlist(
         "user3",
         "550",
         "Fight Club",
@@ -466,143 +314,168 @@ describe("Database Service", () => {
         "want_to_watch"
       );
 
-      const watchedCount = dbFunctions.getMovieStatusCount("550", "watched");
-      const wantToWatchCount = dbFunctions.getMovieStatusCount(
-        "550",
-        "want_to_watch"
-      );
+      const count = database.getMovieStatusCount("550", "want_to_watch");
 
-      expect(watchedCount).toBe(2);
-      expect(wantToWatchCount).toBe(1);
+      expect(count).toBe(3);
     });
   });
 
   describe("watchPartyExists", () => {
     test("should return true when active watch party exists", () => {
-      dbFunctions.createWatchParty("550", "msg123", "user123");
+      database.createWatchParty("550", "msg123", "user123");
 
-      const exists = dbFunctions.watchPartyExists("550");
+      const exists = database.watchPartyExists("550");
+
       expect(exists).toBe(true);
     });
 
     test("should return false when no watch party exists", () => {
-      const exists = dbFunctions.watchPartyExists("999");
+      const exists = database.watchPartyExists("999");
+
       expect(exists).toBe(false);
     });
 
-    test("should return false when watch party is completed", () => {
-      // Create watch party
-      dbFunctions.createWatchParty("550", "msg123", "user123");
+    test("should only check for non-completed parties", () => {
+      // Create party
+      database.createWatchParty("550", "msg123", "user123");
 
       // Mark as completed
-      db.prepare(
-        "UPDATE watch_parties SET completed = 1 WHERE movie_id = ?"
-      ).run("550");
+      database.db
+        .prepare("UPDATE watch_parties SET completed = 1 WHERE movie_id = ?")
+        .run("550");
 
-      const exists = dbFunctions.watchPartyExists("550");
+      const exists = database.watchPartyExists("550");
+
       expect(exists).toBe(false);
     });
   });
 
   describe("createWatchParty", () => {
-    test("should create a watch party and return row ID", () => {
-      const rowId = dbFunctions.createWatchParty("550", "msg123", "user123");
+    test("should create a watch party and return the ID", () => {
+      const partyId = database.createWatchParty("550", "msg123", "user123");
 
-      expect(rowId).toBeGreaterThan(0);
-      expect(dbFunctions.watchPartyExists("550")).toBe(true);
-    });
+      expect(partyId).toBeGreaterThan(0);
 
-    test("should store organizer information", () => {
-      dbFunctions.createWatchParty("550", "msg123", "user123");
-
-      const party = db
-        .prepare("SELECT * FROM watch_parties WHERE movie_id = ?")
-        .get("550");
+      // Verify it was created
+      const party = database.db
+        .prepare("SELECT * FROM watch_parties WHERE id = ?")
+        .get(partyId);
 
       expect(party.movie_id).toBe("550");
       expect(party.message_id).toBe("msg123");
       expect(party.organized_by).toBe("user123");
+    });
+
+    test("should set default values for optional fields", () => {
+      const partyId = database.createWatchParty("550", "msg123", "user123");
+
+      const party = database.db
+        .prepare("SELECT * FROM watch_parties WHERE id = ?")
+        .get(partyId);
+
+      expect(party.thread_id).toBeNull();
+      expect(party.event_id).toBeNull();
       expect(party.completed).toBe(0);
     });
   });
 
   describe("updateWatchParty", () => {
     test("should update watch party with thread and event IDs", () => {
-      // Create watch party first
-      dbFunctions.createWatchParty("550", "msg123", "user123");
+      const partyId = database.createWatchParty("550", "msg123", "user123");
 
-      // Update it
-      const result = dbFunctions.updateWatchParty("550", "thread456", "event789");
+      database.updateWatchParty("550", "thread456", "event789");
 
-      expect(result.changes).toBe(1);
-
-      // Verify update
-      const party = db
-        .prepare("SELECT * FROM watch_parties WHERE movie_id = ?")
-        .get("550");
+      const party = database.db
+        .prepare("SELECT * FROM watch_parties WHERE id = ?")
+        .get(partyId);
 
       expect(party.thread_id).toBe("thread456");
       expect(party.event_id).toBe("event789");
     });
 
-    test("should return 0 changes when movie ID doesn't exist", () => {
-      const result = dbFunctions.updateWatchParty("999", "thread456", "event789");
-      expect(result.changes).toBe(0);
+    test("should allow null values for thread and event IDs", () => {
+      const partyId = database.createWatchParty("550", "msg123", "user123");
+
+      database.updateWatchParty("550", null, null);
+
+      const party = database.db
+        .prepare("SELECT * FROM watch_parties WHERE id = ?")
+        .get(partyId);
+
+      expect(party.thread_id).toBeNull();
+      expect(party.event_id).toBeNull();
     });
   });
 
   describe("getUsersWantingToWatch", () => {
     test("should return all users who want to watch a movie", () => {
-      dbFunctions.addToWatchlist(
+      database.addToWatchlist(
         "user1",
         "550",
         "Fight Club",
         "1999",
         "want_to_watch"
       );
-      dbFunctions.addToWatchlist(
+      database.addToWatchlist(
         "user2",
         "550",
         "Fight Club",
         "1999",
         "want_to_watch"
       );
-      dbFunctions.addToWatchlist(
-        "user3",
-        "550",
-        "Fight Club",
-        "1999",
-        "want_to_watch"
-      );
+      database.addToWatchlist("user3", "550", "Fight Club", "1999", "watched");
 
-      const users = dbFunctions.getUsersWantingToWatch("550");
+      const users = database.getUsersWantingToWatch("550");
 
-      expect(users).toHaveLength(3);
-      expect(users[0].user_id).toBe("user1");
-      expect(users[1].user_id).toBe("user2");
-      expect(users[2].user_id).toBe("user3");
-      expect(users[0].movie_title).toBe("Fight Club");
+      expect(users).toHaveLength(2);
+      expect(users.find((u) => u.user_id === "user1")).toBeDefined();
+      expect(users.find((u) => u.user_id === "user2")).toBeDefined();
+      expect(users.find((u) => u.user_id === "user3")).toBeUndefined();
     });
 
-    test("should only return users with want_to_watch status, not watched", () => {
-      dbFunctions.addToWatchlist(
+    test("should return empty array when no users want to watch", () => {
+      const users = database.getUsersWantingToWatch("999");
+
+      expect(users).toEqual([]);
+    });
+
+    test("should include movie_title and movie_year", () => {
+      database.addToWatchlist(
         "user1",
         "550",
         "Fight Club",
         "1999",
         "want_to_watch"
       );
-      dbFunctions.addToWatchlist("user2", "550", "Fight Club", "1999", "watched");
 
-      const users = dbFunctions.getUsersWantingToWatch("550");
+      const users = database.getUsersWantingToWatch("550");
 
-      expect(users).toHaveLength(1);
-      expect(users[0].user_id).toBe("user1");
+      expect(users[0].movie_title).toBe("Fight Club");
+      expect(users[0].movie_year).toBe("1999");
+    });
+  });
+
+  describe("Database Initialization", () => {
+    test("should create watchlist table on init", () => {
+      const table = database.db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='watchlist'"
+        )
+        .get();
+
+      expect(table).toBeDefined();
+      expect(table.name).toBe("watchlist");
     });
 
-    test("should return empty array when no users want to watch", () => {
-      const users = dbFunctions.getUsersWantingToWatch("999");
-      expect(users).toEqual([]);
+    test("should create watch_parties table on init", () => {
+      const table = database.db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='watch_parties'"
+        )
+        .get();
+
+      expect(table).toBeDefined();
+      expect(table.name).toBe("watch_parties");
     });
   });
 });

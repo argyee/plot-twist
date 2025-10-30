@@ -11,13 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Comprehensive test suite for Priority components** (Services & Utilities)
+- **Comprehensive test suite for Priority 1 components** (Services & Utilities)
   - `tests/database.test.js` - Complete test coverage for all 10 database functions
     - Tests watchlist operations (add, remove, check, get)
     - Tests movie queries and status counts
     - Tests watch party operations (create, update, check existence)
-    - Uses in-memory SQLite (`:memory:`) for isolated test database
-    - 50+ test cases covering edge cases and error scenarios
+    - Uses in-memory SQLite (`:memory:`) for fast, isolated testing
+    - 32 test cases covering edge cases and error scenarios
   - `tests/bullying.test.js` - Comprehensive cooldown and state management tests
     - Tests universal button press tracking across all button types
     - Tests 30-minute cooldown logic with time mocking
@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - 30+ test cases covering all button combinations
   - ~40-50% code coverage achieved for critical business logic
 
+### Fixed
+
+- **Test suite reliability improvements**
+  - Fixed TMDB tests by properly mocking `dotenv` to prevent real `.env` file from loading
+  - Fixed bullying service cooldown boundary condition test
+  - All 106 tests now pass consistently (32 database, 30 bullying, 18 TMDB, 20 button builder, 6 config)
+
 ### Changed
 
 - **CI/CD Pipeline Improvements**
@@ -53,7 +60,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deployment started/success/failure notifications
     - Includes commit message, author, and links to failed runs
   - Setup guide created at `DISCORD_WEBHOOK_SETUP.md`
-- Improved JSDoc type annotations for better IDE support and type safety
+- **Database test environment improvements**
+  - Test database now uses in-memory SQLite (`:memory:`) instead of file-based database
+  - Significantly faster test execution (no disk I/O)
+  - Automatic cleanup (no test database files to manage)
+  - Better test isolation and consistency
+- **Improved JSDoc type annotations** for better IDE support and type safety
   - Updated all interaction handlers to use specific Discord.js v14 interaction types
   - Slash command handlers now use `ChatInputCommandInteraction` instead of generic `Interaction`
   - Autocomplete handler now uses `AutocompleteInteraction`

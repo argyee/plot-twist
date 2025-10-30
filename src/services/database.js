@@ -5,10 +5,14 @@ const fs = require("fs");
 
 // Determine database path based on NODE_ENV
 // Store database files in data/ directory at project root
-const dbPath =
-  process.env.NODE_ENV === "production"
-    ? path.join(__dirname, "..", "..", "data", "movies.db")
-    : path.join(__dirname, "..", "..", "data", "movies_dev.db");
+let dbPath;
+if (process.env.NODE_ENV === "production") {
+  dbPath = path.join(__dirname, "..", "..", "data", "movies.db");
+} else if (process.env.NODE_ENV === "test") {
+  dbPath = ":memory:"; // Use in-memory database for tests (faster, no cleanup needed)
+} else {
+  dbPath = path.join(__dirname, "..", "..", "data", "movies_dev.db");
+}
 
 console.log(`📁 Using database: ${dbPath}`);
 
