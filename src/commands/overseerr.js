@@ -5,7 +5,6 @@
 
 const {
   SlashCommandBuilder,
-  PermissionFlagsBits,
   ChatInputCommandInteraction,
 } = require("discord.js");
 const overseerr = require("../services/overseerr");
@@ -19,8 +18,7 @@ const messages = require("../messages");
 
 const data = new SlashCommandBuilder()
   .setName("overseerr")
-  .setDescription("Manage Overseerr integration (Admin only)")
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+  .setDescription("Manage Overseerr integration")
   .addSubcommand((subcommand) =>
     subcommand
       .setName("link")

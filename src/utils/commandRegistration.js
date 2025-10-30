@@ -34,8 +34,7 @@ async function registerCommands(client) {
     },
     {
       name: "bully",
-      description: "Manage button bullying (Admin only)",
-      default_member_permissions: "8", // Administrator permission
+      description: "Manage button bullying",
       options: [
         {
           name: "set",

@@ -144,6 +144,21 @@ node src/bot.js
 
 ## Commands
 
+### Configuring Command Permissions
+
+By default, all commands are available to everyone. Server admins can restrict admin commands:
+
+1. Go to **Server Settings** → **Integrations**
+2. Click on your bot
+3. Click **Manage** next to a command (e.g., `/bully` or `/overseerr`)
+4. Choose who can use it:
+   - Specific roles
+   - Specific channels
+   - Specific users
+5. Save changes
+
+This gives you full control over who can manage bullying settings and Overseerr without hardcoding permissions.
+
 ### User Commands
 
 - `/movie [title]` - Create a movie discussion post (with autocomplete)
@@ -153,15 +168,17 @@ node src/bot.js
 
 ### Admin Commands
 
-- `/bully set <user>` - Enable button bullying for a specific user (requires Administrator permission)
-- `/bully remove` - Disable bullying (requires Administrator permission)
-- `/bully status` - Check who is currently being bullied (requires Administrator permission)
-- `/bully cd` - Check active cooldowns for the bullied user (requires Administrator permission)
-- `/bully cdreset` - Reset all cooldowns for the bullied user (requires Administrator permission)
-- `/overseerr link <user> <identifier>` - Link a Discord user to their Overseerr account (requires Administrator permission)
-- `/overseerr unlink <user>` - Unlink a Discord user from Overseerr (requires Administrator permission)
-- `/overseerr status` - Check Overseerr connection status (requires Administrator permission)
-- `/overseerr list` - List all linked accounts (requires Administrator permission)
+- `/bully set <user>` - Enable button bullying for a specific user
+- `/bully remove` - Disable bullying
+- `/bully status` - Check who is currently being bullied
+- `/bully cd` - Check active cooldowns for the bullied user
+- `/bully cdreset` - Reset all cooldowns for the bullied user
+- `/overseerr link <user> <identifier>` - Link a Discord user to their Overseerr account
+- `/overseerr unlink <user>` - Unlink a Discord user from Overseerr
+- `/overseerr status` - Check Overseerr connection status
+- `/overseerr list` - List all linked accounts
+
+**Note**: Admin commands have no hardcoded permissions. Server admins should configure command permissions via **Server Settings → Integrations → Your Bot** to control who can use these commands.
 
 ## Button Interactions
 
