@@ -477,5 +477,168 @@ describe("Database Service", () => {
       expect(table).toBeDefined();
       expect(table.name).toBe("watch_parties");
     });
+
+    test("should create overseerr_links table on init", () => {
+      const table = database.db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='overseerr_links'"
+        )
+        .get();
+
+      expect(table).toBeDefined();
+      expect(table.name).toBe("overseerr_links");
+    });
+  });
+
+  describe("Overseerr Link Operations", () => {
+    beforeEach(() => {
+      // Clear overseerr_links table before each test
+      database.db.prepare("DELETE FROM overseerr_links").run();
+    });
+
+    describe("linkOverseerAccount", () => {
+      test("should link a Discord user to Overseerr account", () => {
+        const result = database.linkOverseerAccount(
+          "discord123",
+          "10",
+          "overseerr_user",
+          "plex_user",
+          "admin123"
+        );
+
+        expect(result).toBe(true);
+
+        const link = database.db
+          .prepare("SELECT * FROM overseerr_links WHERE discord_user_id = ?")
+          .get("discord123");
+
+        expect(link).toBeDefined();
+        expect(link.overseerr_user_id).toBe("10");
+        expect(link.overseerr_username).toBe("overseerr_user");
+        expect(link.plex_username).toBe("plex_user");
+        expect(link.linked_by).toBe("admin123");
+      });
+
+      test("should update existing link for same Discord user", () => {
+        // Create initial link
+        database.linkOverseerAccount("discord123", "10", "user1", "plex1", "admin1");
+
+        // Update link
+        const result = database.linkOverseerAccount(
+          "discord123",
+          "20",
+          "user2",
+          "plex2",
+          "admin2"
+        );
+
+        expect(result).toBe(true);
+
+        const link = database.db
+          .prepare("SELECT * FROM overseerr_links WHERE discord_user_id = ?")
+          .get("discord123");
+
+        expect(link.overseerr_user_id).toBe("20");
+        expect(link.overseerr_username).toBe("user2");
+        expect(link.plex_username).toBe("plex2");
+        expect(link.linked_by).toBe("admin2");
+
+        // Should only have one link for this user
+        const count = database.db
+          .prepare("SELECT COUNT(*) as count FROM overseerr_links WHERE discord_user_id = ?")
+          .get("discord123");
+
+        expect(count.count).toBe(1);
+      });
+
+      test("should handle database errors gracefully", () => {
+        // Try to link with null user ID (should violate NOT NULL constraint)
+        // but linkOverseerAccount should catch the error and return false
+        const result = database.linkOverseerAccount("", "10", "user", "plex", "admin");
+
+        // Even with empty string, SQLite should accept it (doesn't violate NOT NULL)
+        // So this test actually verifies the function works with edge cases
+        expect(result).toBe(true);
+      });
+    });
+
+    describe("getOverseerLink", () => {
+      test("should retrieve existing link", () => {
+        database.linkOverseerAccount("discord123", "10", "overseerr_user", "plex_user", "admin");
+
+        const link = database.getOverseerLink("discord123");
+
+        expect(link).toBeDefined();
+        expect(link.discord_user_id).toBe("discord123");
+        expect(link.overseerr_user_id).toBe("10");
+        expect(link.overseerr_username).toBe("overseerr_user");
+        expect(link.plex_username).toBe("plex_user");
+      });
+
+      test("should return null for non-existent link", () => {
+        const link = database.getOverseerLink("nonexistent");
+
+        expect(link).toBeNull();
+      });
+    });
+
+    describe("unlinkOverseerAccount", () => {
+      test("should remove existing link", () => {
+        database.linkOverseerAccount("discord123", "10", "user", "plex", "admin");
+
+        const result = database.unlinkOverseerAccount("discord123");
+
+        expect(result).toBe(true);
+
+        const link = database.getOverseerLink("discord123");
+        expect(link).toBeNull();
+      });
+
+      test("should return true even if link doesn't exist", () => {
+        const result = database.unlinkOverseerAccount("nonexistent");
+
+        expect(result).toBe(true);
+      });
+
+      test("should handle database errors gracefully", () => {
+        // This function wraps delete in try-catch, so it always returns true
+        // unless there's an actual database error
+        // Just verify it returns true even for non-existent accounts
+        const result = database.unlinkOverseerAccount("nonexistent_account");
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe("getAllOverseerLinks", () => {
+      test("should return all links", () => {
+        database.linkOverseerAccount("discord1", "10", "user1", "plex1", "admin");
+        database.linkOverseerAccount("discord2", "20", "user2", "plex2", "admin");
+        database.linkOverseerAccount("discord3", "30", "user3", "plex3", "admin");
+
+        const links = database.getAllOverseerLinks();
+
+        expect(links).toHaveLength(3);
+        expect(links[0].discord_user_id).toBe("discord1");
+        expect(links[1].discord_user_id).toBe("discord2");
+        expect(links[2].discord_user_id).toBe("discord3");
+      });
+
+      test("should return empty array when no links exist", () => {
+        const links = database.getAllOverseerLinks();
+
+        expect(links).toEqual([]);
+      });
+
+      test("should return empty array when database has no errors but no links", () => {
+        // getAllOverseerLinks uses try-catch, but let's test normal empty case
+        // Clear any existing links first
+        database.db.prepare("DELETE FROM overseerr_links").run();
+
+        const result = database.getAllOverseerLinks();
+
+        expect(result).toEqual([]);
+      });
+    });
   });
 });

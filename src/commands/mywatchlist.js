@@ -19,7 +19,9 @@ async function handleWatchlistCommand(interaction) {
     const userId = interaction.user.id;
 
     // Get watched movies
+    /** @type {Array<{movie_title: string, movie_year: number}>} */
     const watchedMovies = getUserWatchlist(userId, "watched");
+    /** @type {Array<{movie_title: string, movie_year: number}>} */
     const wantToWatchMovies = getUserWatchlist(userId, "want_to_watch");
 
     // Create embed

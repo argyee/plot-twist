@@ -15,6 +15,8 @@ module.exports = {
   commandMovieDescription: "Φτιάξε ποστ για συζήτηση ταινίας.",
   commandMovieTitleDescription: "Τίτλος ταινίας",
   commandWatchlistDescription: "Δες τι έχεις δει και τι θέλεις να δεις.",
+  commandRequestDescription: "Ζήτησε ταινία στο Plex χωρίς να φτιάξεις ποστ.",
+  commandRequestOptionTitle: "Τίτλος ταινίας για αίτημα",
 
   // ============================================================================
   // MOVIE COMMAND
@@ -101,7 +103,7 @@ module.exports = {
   watchPartyThresholdReached: (userMentions, count) =>
     `🎉 ${userMentions} - **${count} ${
       count === 1 ? "μάγκας θέλει να το δει!" : "μάγκες θελουν να το δουν!"
-    } **\n\n` + `Κλικ στο "Φτιάξε Ταινιοπάρτυ" για να φτιάξεις ταινιοπάρτυ!`,
+    } **\n\n` + `Κλικ στο "Οργάνωσε Ταινιοπάρτυ" για να φτιάξεις ταινιοπάρτυ!`,
   watchlistError: "❌ Έλουσα με την ενημέρωση watchlist. Πάμε πάλι.",
 
   // ============================================================================
@@ -116,6 +118,9 @@ module.exports = {
   buttonWatchParty: (count) => `Οργάνωσε ταινιοπάρτυ (${count} ενδιαφέρονται)`,
   buttonConfirmDelete: "ΝΑΙ",
   buttonCancelDelete: "Άκυρο",
+  buttonRequestOnPlex: "Ζήτησε στο Plex",
+  buttonRequestPending: "Έχει ζητηθεί",
+  buttonAvailableOnPlex: "Διαθέσιμο στο Plex",
 
   // ============================================================================
   // BULLYING MESSAGES
@@ -124,6 +129,50 @@ module.exports = {
 
   firstPressMessage: (username) =>
     `${username}, δικέ μου, συγκατάθεση ξέρεις τι σημαίνει;`,
-  secondPressMessage: (username) => 
+  secondPressMessage: (username) =>
     `${username}, δες μία αν έρχομαι ρε!`,
+
+  // ============================================================================
+  // OVERSEERR MESSAGES
+  // ============================================================================
+  overseerr: {
+    // Linking messages
+    notLinked:
+      "❌ Δεν έχεις συνδέσει τον λογαριασμό σου στο Plex! Ζήτα από έναν admin να συνδέσει τον λογαριασμό σου.",
+    notLinkedUser: (username) =>
+      `❌ Ο ${username} δεν είναι συνδεδεμένος με λογαριασμό στο Overseerr.`,
+    alreadyLinked: (username, overseerUsername) =>
+      `❌ Ο ${username} είναι ήδη συνδεδεμένος με τον λογαριασμό Overseerr: **${overseerUsername}**`,
+    linkSuccess: (username, overseerUsername) =>
+      `✅ Επιτυχής σύνδεση του ${username} με τον λογαριασμό Overseerr: **${overseerUsername}**`,
+    linkFailed: "❌ Αποτυχία δημιουργίας σύνδεσης. Δοκίμασε ξανά.",
+    unlinkSuccess: (username) =>
+      `✅ Επιτυχής αποσύνδεση του ${username} από το Overseerr.`,
+    unlinkFailed: "❌ Αποτυχία αφαίρεσης σύνδεσης. Δοκίμασε ξανά.",
+    userNotFound: (identifier) =>
+      `❌ Δεν βρέθηκε χρήστης Overseerr με αναγνωριστικό: **${identifier}**\n\nΣιγουρέψου ότι ο χρήστης έχει συνδεθεί στο Overseerr τουλάχιστον μία φορά.`,
+
+    // Request messages
+    requestSuccess: (title, is4k) =>
+      `✅ Η ταινία **${title}** ζητήθηκε${is4k ? " σε 4K" : ""}! Θα ειδοποιηθείς όταν είναι διαθέσιμη.`,
+    requestFailed: (error) => `❌ Αποτυχία αιτήματος: ${error}`,
+    alreadyAvailable: "🟢 Αυτή η ταινία είναι ήδη διαθέσιμη στο Plex!",
+    alreadyRequested:
+      "🟡 Αυτή η ταινία έχει ήδη ζητηθεί. Θα προστεθεί σύντομα!",
+    cancelSuccess: "✅ Το αίτημα ακυρώθηκε επιτυχώς.",
+    cancelFailed: (error) => `❌ Αποτυχία ακύρωσης αιτήματος: ${error}`,
+
+    // My requests
+    noRequests:
+      "Δεν έχεις ζητήσει καμία ταινία ακόμα. Κάνε κλικ στο κουμπί 'Ζήτησε στο Plex' σε οποιοδήποτε post ταινίας!",
+
+    // Admin messages
+    notConfigured:
+      "❌ Το Overseerr δεν είναι ρυθμισμένο. Όρισε τα OVERSEERR_URL και OVERSEERR_API_KEY στο .env αρχείο σου.",
+    connectionSuccess: (version) =>
+      `✅ Επιτυχής σύνδεση με το Overseerr!\n\n**Έκδοση:** ${version}`,
+    connectionFailed: (error) =>
+      `❌ Αποτυχία σύνδεσης με το Overseerr:\n${error}`,
+    noLinks: "Κανένας χρήστης δεν είναι συνδεδεμένος με λογαριασμό Overseerr.",
+  },
 };

@@ -5,6 +5,9 @@
 
 const { REST, Routes } = require("discord.js");
 const messages = require("../messages");
+const overseerrCommand = require("../commands/overseerr");
+const myRequestsCommand = require("../commands/myrequests");
+const requestCommand = require("../commands/request");
 
 /**
  * Register slash commands with Discord
@@ -31,8 +34,7 @@ async function registerCommands(client) {
     },
     {
       name: "bully",
-      description: "Manage button bullying (Admin only)",
-      default_member_permissions: "8", // Administrator permission
+      description: "Manage button bullying",
       options: [
         {
           name: "set",
@@ -69,6 +71,10 @@ async function registerCommands(client) {
         },
       ],
     },
+    // Convert command SlashCommandBuilders to JSON
+    overseerrCommand.data.toJSON(),
+    myRequestsCommand.data.toJSON(),
+    requestCommand.data.toJSON(),
   ];
 
   const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);

@@ -10,6 +10,7 @@ const {
   getMovieStatusCount,
   watchPartyExists,
 } = require("../services/database");
+const overseerr = require("../services/overseerr");
 
 /**
  * Build button row for movie post
@@ -17,9 +18,10 @@ const {
  * @param {string} movieId - TMDB movie ID
  * @param {string} authorId - User ID of post author
  * @param {Object} movie - Movie details object
+ * @param {Object} overseerStatus - Overseerr availability status (optional)
  * @returns {ActionRowBuilder} Button row component
  */
-function buildMovieButtons(movieId, authorId, movie) {
+function buildMovieButtons(movieId, authorId, movie, overseerStatus = null) {
   const buttons = [
     new ButtonBuilder()
       .setCustomId(`watched_${authorId}_${movieId}`)
@@ -57,19 +59,42 @@ function buildMovieButtons(movieId, authorId, movie) {
     );
   }
 
-  // Add Trailer button if available (but not if watch party button will show - 5 button limit)
-  if (movie.trailerUrl && !showWatchParty) {
-    buttons.push(
-      new ButtonBuilder()
-        .setLabel(messages.buttonTrailer)
-        .setURL(movie.trailerUrl)
-        .setStyle(ButtonStyle.Link)
-        .setEmoji("🎥")
-    );
+  // Add Overseerr request button (replaces trailer button)
+  if (overseerr.isConfigured() && overseerStatus) {
+    if (overseerStatus.available) {
+      // Movie is available on Plex
+      buttons.push(
+        new ButtonBuilder()
+          .setCustomId(`request_${movieId}`)
+          .setLabel(messages.buttonAvailableOnPlex)
+          .setEmoji("🟢")
+          .setStyle(ButtonStyle.Success)
+          .setDisabled(true)
+      );
+    } else if (overseerStatus.requested || overseerStatus.processing) {
+      // Movie has been requested or is processing
+      buttons.push(
+        new ButtonBuilder()
+          .setCustomId(`request_${movieId}`)
+          .setLabel(messages.buttonRequestPending)
+          .setEmoji("🟡")
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(true)
+      );
+    } else {
+      // Movie can be requested
+      buttons.push(
+        new ButtonBuilder()
+          .setCustomId(`request_${movieId}`)
+          .setLabel(messages.buttonRequestOnPlex)
+          .setEmoji("📥")
+          .setStyle(ButtonStyle.Primary)
+      );
+    }
   }
 
-  // Add watch party button if threshold reached
-  if (showWatchParty) {
+  // Add watch party button if threshold reached (but not if it would exceed 5 button limit)
+  if (showWatchParty && buttons.length < 5) {
     buttons.push(
       new ButtonBuilder()
         .setCustomId(`watch_party_${movieId}`)
