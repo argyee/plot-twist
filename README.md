@@ -148,6 +148,7 @@ node src/bot.js
 
 - `/movie [title]` - Create a movie discussion post (with autocomplete)
 - `/mywatchlist` - View your watched movies and watchlist
+- `/request [title]` - Quick request a movie on Plex without creating a post (requires Overseerr setup)
 - `/myrequests` - View your Overseerr movie requests (requires Overseerr setup)
 
 ### Admin Commands
@@ -269,6 +270,7 @@ discord_moviebot/
 │   ├── commands/           # Slash command handlers
 │   │   ├── movie.js        # /movie command
 │   │   ├── mywatchlist.js  # /mywatchlist command
+│   │   ├── request.js      # /request command (quick Plex requests)
 │   │   ├── myrequests.js   # /myrequests command
 │   │   ├── bully.js        # /bully command
 │   │   └── overseerr.js    # /overseerr command
@@ -435,7 +437,9 @@ View all linked accounts:
 
 1. **Account Linking**: Admin links Discord users to their Overseerr accounts using usernames or emails
 2. **Automatic Status**: Movie posts show availability status (Available/Pending/Request)
-3. **One-Click Requests**: Users click "Request on Plex" button to submit requests
+3. **Request Methods**:
+   - **From Movie Posts**: Click "Request on Plex" button on any movie post
+   - **Quick Request**: Use `/request [title]` command for instant requests without creating posts
 4. **4K Toggle**: Modal appears allowing users to request in 4K quality
 5. **Request Management**: Users view their requests with `/myrequests`
 

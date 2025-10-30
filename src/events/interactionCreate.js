@@ -8,9 +8,10 @@ const handleWatchlistCommand = require("../commands/mywatchlist");
 const handleBullyCommand = require("../commands/bully");
 const handleOverseerrCommand = require("../commands/overseerr");
 const handleMyRequestsCommand = require("../commands/myrequests");
+const handleRequestCommand = require("../commands/request");
 const handleAutocomplete = require("../handlers/autocomplete");
 const handleButtonInteraction = require("../handlers/buttons/index");
-const { handleRequestModal } = require("../handlers/buttons/request");
+const { handleRequestModal, handleQuickRequestModal } = require("../handlers/buttons/request");
 
 /**
  * Handle all interaction events
@@ -39,6 +40,8 @@ module.exports = async (client, interaction) => {
         await handleOverseerrCommand.execute(interaction);
       } else if (commandName === "myrequests") {
         await handleMyRequestsCommand.execute(interaction);
+      } else if (commandName === "request") {
+        await handleRequestCommand.execute(interaction);
       }
       return;
     }
@@ -53,6 +56,8 @@ module.exports = async (client, interaction) => {
     if (interaction.isModalSubmit()) {
       if (interaction.customId.startsWith("request_modal_")) {
         await handleRequestModal(interaction);
+      } else if (interaction.customId.startsWith("quick_request_modal_")) {
+        await handleQuickRequestModal(interaction);
       }
       return;
     }

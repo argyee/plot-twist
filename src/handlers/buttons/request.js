@@ -165,7 +165,68 @@ async function handleRequestModal(interaction) {
   }
 }
 
+/**
+ * Handle quick request modal submission (from /request command)
+ * @param {ModalSubmitInteraction} interaction - Discord modal interaction
+ */
+async function handleQuickRequestModal(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const movieId = interaction.customId.split("_")[3];
+  const userId = interaction.user.id;
+  const qualityInput = interaction.fields.getTextInputValue("quality").toLowerCase();
+  const is4k = qualityInput === "4k";
+
+  // Get user's Overseerr link
+  const link = getOverseerLink(userId);
+  if (!link) {
+    return await interaction.editReply({
+      content: messages.overseerr.notLinked,
+    });
+  }
+
+  // Check status again to prevent double-requests
+  const status = await overseerr.getMovieStatus(movieId);
+  if (status.available) {
+    return await interaction.editReply({
+      content: messages.overseerr.alreadyAvailable,
+    });
+  }
+
+  if (status.requested || status.processing) {
+    return await interaction.editReply({
+      content: messages.overseerr.alreadyRequested,
+    });
+  }
+
+  // Submit request to Overseerr
+  const result = await overseerr.createMovieRequest(
+    movieId,
+    link.overseerr_user_id,
+    is4k
+  );
+
+  if (result.success) {
+    // Get movie details for the success message
+    const movie = await getMovieDetails(movieId);
+    const movieTitle = movie ? movie.title : "Movie";
+
+    await interaction.editReply({
+      content: messages.overseerr.requestSuccess(movieTitle, is4k),
+    });
+
+    console.log(
+      `[OVERSEERR] Quick request created: ${movieTitle} by ${interaction.user.tag}${is4k ? " (4K)" : ""}`
+    );
+  } else {
+    await interaction.editReply({
+      content: messages.overseerr.requestFailed(result.error),
+    });
+  }
+}
+
 module.exports = {
   handleRequestButton,
   handleRequestModal,
+  handleQuickRequestModal,
 };

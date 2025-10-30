@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 4K quality toggle when requesting movies
   - Admin commands for account linking (`/overseerr link`, `unlink`, `status`, `list`)
   - User command to view requests (`/myrequests`)
+  - **Quick request command (`/request`)** - Request movies without creating forum posts
+    - TMDB autocomplete for movie search
+    - 4K quality toggle via modal
+    - Direct request submission to Overseerr
+    - Ephemeral responses (only visible to requester)
   - Discord users linked to Overseerr/Plex accounts via database
   - Full English and Greek localization for all features
   - Integration with existing button bullying system

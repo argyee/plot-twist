@@ -11,6 +11,8 @@ module.exports = {
   commandMovieDescription: "Create a movie discussion post",
   commandMovieTitleDescription: "Movie title to search for",
   commandWatchlistDescription: "View your watched movies and watchlist",
+  commandRequestDescription: "Request a movie on Plex without creating a post",
+  commandRequestOptionTitle: "Movie title to request",
 
   // ============================================================================
   // MOVIE COMMAND
