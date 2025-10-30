@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.1.2] - 2025-10-30
+
+### Added
+
+- **Dynamic Bot Status Display**:
+  - Bot presence now shows "Movie Nerd".
+  - Automatically updates to "Movie Nerd and {username}'s bully" when a user is set as the bully target
+  - Real-time status updates when `/bully set` or `/bully remove` commands are used
+  - Fetches and displays the bullied user's display name from Discord
+
 ## [1.1.1] - 2025-01-29
 
 ### Added

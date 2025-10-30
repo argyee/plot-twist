@@ -3,8 +3,13 @@
  * Tracks button presses for specific users and adds delays/jokes
  */
 
+const { ActivityType } = require("discord.js");
+
 // The special user who gets bullied (can be changed dynamically)
 let BULLIED_USER_ID = null; // null = no one is being bullied
+
+// Discord client reference for updating bot presence
+let discordClient = null;
 
 const messages = require("../messages");
 
@@ -14,6 +19,51 @@ const userTracker = new Map();
 
 // Cooldown period in milliseconds (30 minutes)
 const COOLDOWN_MS = 30 * 60 * 1000;
+
+/**
+ * Initialize bullying service with Discord client
+ * @param {Client} client - Discord client instance
+ */
+function initializeBullyingClient(client) {
+  discordClient = client;
+}
+
+/**
+ * Update bot presence based on current bullying status
+ */
+async function updateBotPresence() {
+  if (!discordClient || !discordClient.user) {
+    console.log("[BULLYING] Cannot update presence: client not initialized");
+    return;
+  }
+
+  try {
+    if (BULLIED_USER_ID) {
+      // Fetch the user's display name
+      const user = await discordClient.users.fetch(BULLIED_USER_ID);
+      const username = user.displayName || user.username;
+
+      await discordClient.user.setPresence({
+        activities: [
+          {
+            name: `Movie Nerd and ${username}'s bully`,
+            type: ActivityType.Custom,
+          },
+        ],
+        status: "online",
+      });
+      console.log(`[BULLYING] Bot presence updated: bullying ${username}`);
+    } else {
+      await discordClient.user.setPresence({
+        activities: [{ name: "Movie Nerd", type: ActivityType.Custom }],
+        status: "online",
+      });
+      console.log("[BULLYING] Bot presence updated: no bullying");
+    }
+  } catch (error) {
+    console.error("[BULLYING] Error updating bot presence:", error);
+  }
+}
 
 /**
  * Check if user should be bullied
@@ -35,6 +85,9 @@ function setBulliedUser(userId) {
   } else {
     console.log(`✅ Bullying disabled`);
   }
+
+  // Update bot presence to reflect the change
+  updateBotPresence();
 }
 
 /**
@@ -231,6 +284,7 @@ function resetAllCooldowns() {
 }
 
 module.exports = {
+  initializeBullyingClient,
   shouldBullyUser,
   processBulliedButtonPress,
   getCooldownRemaining,
