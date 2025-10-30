@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Overseerr Integration for Plex Requests**:
+  - Replace Trailer button with dynamic "Request on Plex" button
+  - Button shows movie availability status (🟢 Available / 🟡 Pending / 📥 Request)
+  - 4K quality toggle when requesting movies
+  - Admin commands for account linking (`/overseerr link`, `unlink`, `status`, `list`)
+  - User command to view requests (`/myrequests`)
+  - Discord users linked to Overseerr/Plex accounts via database
+  - Full English and Greek localization for all features
+  - Integration with existing button bullying system
+
+### Changed
+
+- Removed Trailer button from movie posts (replaced with Request button)
+- Updated button builder logic to accommodate Overseerr status
+- Movie posts now show availability status in embed footer when Overseerr is configured
 
 ## [1.1.2] - 2025-10-30
 

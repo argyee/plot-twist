@@ -8,7 +8,8 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
 - 📊 Rich embeds with movie info (cast, director, rating, runtime, etc.)
 - 🔘 Interactive buttons:
   - Mark movies as "Watched" or "Want to Watch"
-  - Quick links to IMDB and trailers
+  - Quick links to IMDB
+  - **Request on Plex** - Request movies through Overseerr with 4K support
   - Delete posts (author only with confirmation)
   - **Watch Party Organization** - Coordinate movie nights with friends!
 - 💾 SQLite database to track user watchlists
@@ -30,6 +31,13 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
   - Cooldown management (check and reset)
   - Public messages so everyone can see the trolling
   - See [BULLYING_SETUP.md](BULLYING_SETUP.md) for details
+- 🎬 **Overseerr Integration** (Optional):
+  - Request movies directly from Discord to your Plex server
+  - Shows real-time availability status (Available/Pending/Not Available)
+  - 4K quality toggle when requesting
+  - Admin commands to link Discord users to Overseerr accounts
+  - View and manage your requests with `/myrequests`
+  - Automatic status updates in movie post embeds
 
  ## Preview
 
@@ -116,6 +124,10 @@ DISCORD_TOKEN=your_discord_bot_token
 TMDB_API_KEY=your_tmdb_api_key
 MOVIE_FORUM_CHANNEL_ID=your_forum_channel_id
 TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
+
+# Optional: Overseerr Integration
+OVERSEERR_URL=http://localhost:5055
+OVERSEERR_API_KEY=your_overseerr_api_key
 ```
 
 4. Run the bot
@@ -136,6 +148,7 @@ node src/bot.js
 
 - `/movie [title]` - Create a movie discussion post (with autocomplete)
 - `/mywatchlist` - View your watched movies and watchlist
+- `/myrequests` - View your Overseerr movie requests (requires Overseerr setup)
 
 ### Admin Commands
 
@@ -144,6 +157,10 @@ node src/bot.js
 - `/bully status` - Check who is currently being bullied (requires Administrator permission)
 - `/bully cd` - Check active cooldowns for the bullied user (requires Administrator permission)
 - `/bully cdreset` - Reset all cooldowns for the bullied user (requires Administrator permission)
+- `/overseerr link <user> <identifier>` - Link a Discord user to their Overseerr account (requires Administrator permission)
+- `/overseerr unlink <user>` - Unlink a Discord user from Overseerr (requires Administrator permission)
+- `/overseerr status` - Check Overseerr connection status (requires Administrator permission)
+- `/overseerr list` - List all linked accounts (requires Administrator permission)
 
 ## Button Interactions
 
@@ -153,7 +170,7 @@ When a movie post is created, users can:
 - Click **Want to Watch** to add to your watchlist (adds to your list + reaction)
 - Click again to remove from watchlist (toggle functionality)
 - Click **IMDB** to open the movie on IMDB
-- Click **Trailer** to watch the trailer on YouTube (hidden when Watch Party button appears due to Discord's 5 button limit)
+- Click **Request on Plex** to request the movie through Overseerr (shows status if already available/requested)
 - Click **Delete Post** (author only) to remove the post with confirmation
 - Click **Organize Watch Party** (appears when enough people are interested) to coordinate a movie night
 
@@ -251,7 +268,10 @@ discord_moviebot/
 │   ├── bot.js              # Main entry point
 │   ├── commands/           # Slash command handlers
 │   │   ├── movie.js        # /movie command
-│   │   └── mywatchlist.js  # /mywatchlist command
+│   │   ├── mywatchlist.js  # /mywatchlist command
+│   │   ├── myrequests.js   # /myrequests command
+│   │   ├── bully.js        # /bully command
+│   │   └── overseerr.js    # /overseerr command
 │   ├── events/             # Discord event handlers
 │   │   ├── ready.js        # Bot ready event
 │   │   └── interactionCreate.js  # Interaction router
@@ -262,6 +282,7 @@ discord_moviebot/
 │   │       ├── watched.js  # Watched button handler
 │   │       ├── watchlist.js # Watchlist button handler
 │   │       ├── watchParty.js # Watch party button handler
+│   │       ├── request.js  # Overseerr request handler
 │   │       └── delete.js   # Delete button handlers
 │   ├── utils/              # Utility functions
 │   │   ├── buttonBuilder.js      # Dynamic button creation
@@ -270,6 +291,7 @@ discord_moviebot/
 │   │   ├── config.js       # Configuration (genres, emojis, settings)
 │   │   ├── database.js     # SQLite database operations
 │   │   ├── tmdb.js         # TMDB API integration
+│   │   ├── overseerr.js    # Overseerr API integration
 │   │   └── bullying.js     # Button bullying system
 │   └── messages/           # Language files
 │       ├── index.js        # Language loader
@@ -362,10 +384,94 @@ To add a new language (e.g., Spanish):
    ```
 4. Set `LANGUAGE=ee` in `.env`
 
+## Overseerr Setup (Optional)
+
+If you want to enable Plex movie requests through Overseerr:
+
+### 1. Get Overseerr API Key
+
+1. Log into your Overseerr instance as an admin
+2. Go to **Settings** → **General**
+3. Scroll to **API Key** section
+4. Copy your API key
+
+### 2. Configure Environment Variables
+
+Add to your `.env` file:
+
+```env
+OVERSEERR_URL=http://your-overseerr-url:5055
+OVERSEERR_API_KEY=your_api_key_here
+```
+
+### 3. Link Discord Users to Overseerr
+
+Use admin commands to link Discord users to their Overseerr/Plex accounts:
+
+```
+/overseerr link @username their_overseerr_username
+```
+
+Or use their Plex email:
+```
+/overseerr link @username user@example.com
+```
+
+The bot will search Overseerr for a matching user and create the link.
+
+### 4. Verify Setup
+
+Test the connection:
+```
+/overseerr status
+```
+
+View all linked accounts:
+```
+/overseerr list
+```
+
+### How It Works
+
+1. **Account Linking**: Admin links Discord users to their Overseerr accounts using usernames or emails
+2. **Automatic Status**: Movie posts show availability status (Available/Pending/Request)
+3. **One-Click Requests**: Users click "Request on Plex" button to submit requests
+4. **4K Toggle**: Modal appears allowing users to request in 4K quality
+5. **Request Management**: Users view their requests with `/myrequests`
+
+### Linking Options
+
+You have three ways to link users:
+
+**Option 1: By Overseerr Display Name**
+```
+/overseerr link @discorduser OverseerrUsername
+```
+
+**Option 2: By Plex Username**
+```
+/overseerr link @discorduser PlexUsername
+```
+
+**Option 3: By Plex Email**
+```
+/overseerr link @discorduser user@example.com
+```
+
+The bot searches all three fields and creates the link automatically.
+
+### Unlinking
+
+To remove a link:
+```
+/overseerr unlink @username
+```
+
 ## Technologies
 
 - [Discord.js](https://discord.js.org/) - Discord API wrapper
 - [TMDB API](https://www.themoviedb.org/documentation/api) - Movie data
+- [Overseerr API](https://docs.overseerr.dev/) - Media request management (optional)
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) - SQLite database
 - [axios](https://axios-http.com/) - HTTP client
 - [Jest](https://jestjs.io/) - Testing framework
