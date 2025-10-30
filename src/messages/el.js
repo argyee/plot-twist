@@ -15,7 +15,7 @@ module.exports = {
   commandMovieDescription: "Φτιάξε ποστ για συζήτηση ταινίας.",
   commandMovieTitleDescription: "Τίτλος ταινίας",
   commandWatchlistDescription: "Δες τι έχεις δει και τι θέλεις να δεις.",
-  commandRequestDescription: "Ζήτησε ταινία στο Plex χωρίς να φτιάξεις ποστ.",
+  commandRequestDescription: "Ζήτησε ταινία στο Plex και θα σε φτιάξω.",
   commandRequestOptionTitle: "Τίτλος ταινίας για αίτημα",
 
   // ============================================================================
