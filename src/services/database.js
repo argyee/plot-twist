@@ -60,6 +60,19 @@ function initDatabase() {
     )
   `);
 
+  // Overseerr account linking table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS overseerr_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      discord_user_id TEXT UNIQUE NOT NULL,
+      overseerr_user_id TEXT NOT NULL,
+      overseerr_username TEXT,
+      plex_username TEXT,
+      linked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      linked_by TEXT
+    )
+  `);
+
   console.log("✅ Database tables initialized");
 }
 
@@ -178,6 +191,60 @@ function getUsersWantingToWatch(movieId) {
   return stmt.all(movieId);
 }
 
+// Link Discord user to Overseerr account
+function linkOverseerAccount(
+  discordUserId,
+  overseerUserId,
+  overseerUsername,
+  plexUsername,
+  linkedBy
+) {
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO overseerr_links
+    (discord_user_id, overseerr_user_id, overseerr_username, plex_username, linked_by)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  const result = stmt.run(
+    discordUserId,
+    overseerUserId,
+    overseerUsername,
+    plexUsername,
+    linkedBy
+  );
+  return result.changes > 0;
+}
+
+// Get Overseerr link for Discord user
+function getOverseerLink(discordUserId) {
+  const stmt = db.prepare(`
+    SELECT * FROM overseerr_links
+    WHERE discord_user_id = ?
+  `);
+
+  return stmt.get(discordUserId);
+}
+
+// Remove Overseerr link
+function unlinkOverseerAccount(discordUserId) {
+  const stmt = db.prepare(`
+    DELETE FROM overseerr_links WHERE discord_user_id = ?
+  `);
+
+  const result = stmt.run(discordUserId);
+  return result.changes > 0;
+}
+
+// Get all Overseerr links
+function getAllOverseerLinks() {
+  const stmt = db.prepare(`
+    SELECT * FROM overseerr_links
+    ORDER BY linked_at DESC
+  `);
+
+  return stmt.all();
+}
+
 // Initialize database on load
 initDatabase();
 
@@ -193,4 +260,8 @@ module.exports = {
   createWatchParty,
   updateWatchParty,
   getUsersWantingToWatch,
+  linkOverseerAccount,
+  getOverseerLink,
+  unlinkOverseerAccount,
+  getAllOverseerLinks,
 };

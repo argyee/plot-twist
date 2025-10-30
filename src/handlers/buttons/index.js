@@ -12,6 +12,7 @@ const {
   handleConfirmDelete,
   handleCancelDelete,
 } = require("./delete");
+const { handleRequestButton } = require("./request");
 
 /**
  * Route button interactions to appropriate handler based on customId
@@ -27,6 +28,8 @@ async function handleButtonInteraction(interaction) {
       await handleWatchlistButton(interaction);
     } else if (customId.startsWith("watch_party_")) {
       await handleWatchPartyButton(interaction);
+    } else if (customId.startsWith("request_")) {
+      await handleRequestButton(interaction);
     } else if (customId.startsWith("delete_")) {
       await handleDeleteButton(interaction);
     } else if (customId.startsWith("confirm_delete_")) {

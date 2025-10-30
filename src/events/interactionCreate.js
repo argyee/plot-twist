@@ -6,8 +6,11 @@
 const handleMovieCommand = require("../commands/movie");
 const handleWatchlistCommand = require("../commands/mywatchlist");
 const handleBullyCommand = require("../commands/bully");
+const handleOverseerrCommand = require("../commands/overseerr");
+const handleMyRequestsCommand = require("../commands/myrequests");
 const handleAutocomplete = require("../handlers/autocomplete");
 const handleButtonInteraction = require("../handlers/buttons/index");
+const { handleRequestModal } = require("../handlers/buttons/request");
 
 /**
  * Handle all interaction events
@@ -32,6 +35,10 @@ module.exports = async (client, interaction) => {
         await handleWatchlistCommand(interaction);
       } else if (commandName === "bully") {
         await handleBullyCommand(interaction);
+      } else if (commandName === "overseerr") {
+        await handleOverseerrCommand.execute(interaction);
+      } else if (commandName === "myrequests") {
+        await handleMyRequestsCommand.execute(interaction);
       }
       return;
     }
@@ -39,6 +46,14 @@ module.exports = async (client, interaction) => {
     // Handle button interactions
     if (interaction.isButton()) {
       await handleButtonInteraction(interaction);
+      return;
+    }
+
+    // Handle modal submissions
+    if (interaction.isModalSubmit()) {
+      if (interaction.customId.startsWith("request_modal_")) {
+        await handleRequestModal(interaction);
+      }
       return;
     }
   } catch (error) {

@@ -9,8 +9,10 @@ jest.mock("../src/messages", () => ({
   buttonWantToWatch: "Want to Watch",
   buttonDelete: "Delete Post",
   buttonIMDB: "IMDB",
-  buttonTrailer: "Trailer",
   buttonWatchParty: (count) => `Organize Watch Party (${count} interested)`,
+  buttonRequestOnPlex: "Request on Plex",
+  buttonRequestPending: "Request Pending",
+  buttonAvailableOnPlex: "Available on Plex",
 }));
 
 // Mock config module
@@ -25,6 +27,11 @@ jest.mock("../src/services/config", () => ({
 jest.mock("../src/services/database", () => ({
   getMovieStatusCount: jest.fn(),
   watchPartyExists: jest.fn(),
+}));
+
+// Mock overseerr module
+jest.mock("../src/services/overseerr", () => ({
+  isConfigured: jest.fn(() => false), // Default to not configured
 }));
 
 const { buildMovieButtons } = require("../src/utils/buttonBuilder");
@@ -115,35 +122,28 @@ describe("Button Builder", () => {
       expect(imdbButton.data.emoji.name).toBe("⭐");
     });
 
-    test("should add Trailer button when trailerUrl is provided", () => {
+    test("should not add extra buttons when Overseerr is not configured", () => {
       const movie = {
         imdbUrl: null,
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
+        trailerUrl: null,
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      expect(row.components).toHaveLength(4);
-      const trailerButton = row.components[3];
-      expect(trailerButton.data.label).toBe("Trailer");
-      expect(trailerButton.data.url).toBe(
-        "https://www.youtube.com/watch?v=SUXWAEX2jlg"
-      );
-      expect(trailerButton.data.style).toBe(5); // Link style
-      expect(trailerButton.data.emoji.name).toBe("🎥");
+      // Only basic buttons (Watched, Want to Watch, Delete)
+      expect(row.components).toHaveLength(3);
     });
 
-    test("should add both IMDB and Trailer buttons when both URLs provided", () => {
+    test("should add IMDB button when provided without Overseerr", () => {
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      expect(row.components).toHaveLength(5); // All 5 slots filled
+      // Basic + IMDB
+      expect(row.components).toHaveLength(4);
       expect(row.components[3].data.label).toBe("IMDB");
-      expect(row.components[4].data.label).toBe("Trailer");
     });
 
     test("should not add IMDB button when imdbUrl is null", () => {
@@ -230,40 +230,35 @@ describe("Button Builder", () => {
   });
 
   describe("buildMovieButtons - 5 Button Limit", () => {
-    test("should hide trailer button when watch party button shows (5 button limit)", () => {
+    test("should include watch party button when threshold reached", () => {
       database.getMovieStatusCount.mockReturnValue(3); // At threshold
       database.watchPartyExists.mockReturnValue(false);
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
       // Should have: Watched, Want to Watch, Delete, IMDB, Watch Party
-      // Trailer should be hidden
       expect(row.components).toHaveLength(5);
       expect(row.components[3].data.label).toBe("IMDB");
       expect(row.components[4].data.label).toBe("Organize Watch Party (3 interested)");
-      expect(row.components.every((btn) => btn.data.label !== "Trailer")).toBe(true);
     });
 
-    test("should show trailer button when watch party button does not show", () => {
+    test("should show only basic + IMDB when below watch party threshold", () => {
       database.getMovieStatusCount.mockReturnValue(2); // Below threshold
       database.watchPartyExists.mockReturnValue(false);
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      // Should have: Watched, Want to Watch, Delete, IMDB, Trailer
-      expect(row.components).toHaveLength(5);
+      // Should have: Watched, Want to Watch, Delete, IMDB
+      expect(row.components).toHaveLength(4);
       expect(row.components[3].data.label).toBe("IMDB");
-      expect(row.components[4].data.label).toBe("Trailer");
     });
 
     test("should respect 5 button maximum", () => {
@@ -272,7 +267,6 @@ describe("Button Builder", () => {
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
@@ -319,19 +313,17 @@ describe("Button Builder", () => {
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      // Watched, Want to Watch, Delete, IMDB, Trailer
-      expect(row.components).toHaveLength(5);
+      // Watched, Want to Watch, Delete, IMDB (no trailer button anymore)
+      expect(row.components).toHaveLength(4);
       expect(row.components.map((b) => b.data.label)).toEqual([
         "Watched",
         "Want to Watch",
         "Delete Post",
         "IMDB",
-        "Trailer",
       ]);
     });
 
@@ -341,12 +333,11 @@ describe("Button Builder", () => {
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      // Watched, Want to Watch, Delete, IMDB, Watch Party (Trailer hidden)
+      // Watched, Want to Watch, Delete, IMDB, Watch Party
       expect(row.components).toHaveLength(5);
       expect(row.components.map((b) => b.data.label)).toEqual([
         "Watched",
@@ -363,19 +354,17 @@ describe("Button Builder", () => {
 
       const movie = {
         imdbUrl: "https://www.imdb.com/title/tt0137523/",
-        trailerUrl: "https://www.youtube.com/watch?v=SUXWAEX2jlg",
       };
 
       const row = buildMovieButtons("550", "user123", movie);
 
-      // Watched, Want to Watch, Delete, IMDB, Trailer (Watch Party hidden)
-      expect(row.components).toHaveLength(5);
+      // Watched, Want to Watch, Delete, IMDB (Watch Party hidden as party exists)
+      expect(row.components).toHaveLength(4);
       expect(row.components.map((b) => b.data.label)).toEqual([
         "Watched",
         "Want to Watch",
         "Delete Post",
         "IMDB",
-        "Trailer",
       ]);
     });
 

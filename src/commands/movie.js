@@ -8,6 +8,7 @@ const { getMovieDetails } = require("../services/tmdb");
 const { buildMovieButtons } = require("../utils/buttonBuilder");
 const config = require("../services/config");
 const messages = require("../messages");
+const overseerr = require("../services/overseerr");
 
 const MOVIE_FORUM_CHANNEL_ID = process.env.MOVIE_FORUM_CHANNEL_ID;
 
@@ -96,8 +97,30 @@ async function handleMovieCommand(interaction, client) {
     // Get tag IDs
     const tagIds = getTagIds(forumChannel, movie.genreIds);
 
+    // Check Overseerr status if configured
+    let overseerStatus = null;
+    if (overseerr.isConfigured()) {
+      overseerStatus = await overseerr.getMovieStatus(movieId);
+
+      // Add availability info to footer if available
+      if (overseerStatus.available) {
+        embed.setFooter({
+          text: "🟢 Available on Plex | Data from TMDB",
+        });
+      } else if (overseerStatus.requested || overseerStatus.processing) {
+        embed.setFooter({
+          text: "🟡 Request Pending | Data from TMDB",
+        });
+      }
+    }
+
     // Create forum thread with action buttons
-    const row = buildMovieButtons(movieId, interaction.user.id, movie);
+    const row = buildMovieButtons(
+      movieId,
+      interaction.user.id,
+      movie,
+      overseerStatus
+    );
 
     const thread = await forumChannel.threads.create({
       name: `${movie.title} (${movie.year})`,

@@ -116,6 +116,9 @@ module.exports = {
   buttonWatchParty: (count) => `Organize Watch Party (${count} interested)`,
   buttonConfirmDelete: "Yes, Delete",
   buttonCancelDelete: "Cancel",
+  buttonRequestOnPlex: "Request on Plex",
+  buttonRequestPending: "Request Pending",
+  buttonAvailableOnPlex: "Available on Plex",
 
   // ============================================================================
   // BULLYING MESSAGES
@@ -125,4 +128,48 @@ module.exports = {
     `Everyone, ${username} is trying to touch me.`,
   secondPressMessage: (username) =>
     `${username} still trying to press my buttons.`,
+
+  // ============================================================================
+  // OVERSEERR MESSAGES
+  // ============================================================================
+  overseerr: {
+    // Linking messages
+    notLinked:
+      "❌ You haven't linked your Plex account yet! Ask an admin to link your account using `/overseerr link`.",
+    notLinkedUser: (username) =>
+      `❌ ${username} is not linked to an Overseerr account.`,
+    alreadyLinked: (username, overseerUsername) =>
+      `❌ ${username} is already linked to Overseerr account: **${overseerUsername}**`,
+    linkSuccess: (username, overseerUsername) =>
+      `✅ Successfully linked ${username} to Overseerr account: **${overseerUsername}**`,
+    linkFailed: "❌ Failed to create link. Please try again.",
+    unlinkSuccess: (username) =>
+      `✅ Successfully unlinked ${username} from Overseerr.`,
+    unlinkFailed: "❌ Failed to remove link. Please try again.",
+    userNotFound: (identifier) =>
+      `❌ No Overseerr user found with identifier: **${identifier}**\n\nMake sure the user has logged into Overseerr at least once.`,
+
+    // Request messages
+    requestSuccess: (title, is4k) =>
+      `✅ **${title}** has been requested${is4k ? " in 4K" : ""}! You'll be notified when it's available.`,
+    requestFailed: (error) => `❌ Failed to request movie: ${error}`,
+    alreadyAvailable: "🟢 This movie is already available on Plex!",
+    alreadyRequested:
+      "🟡 This movie has already been requested. It will be added soon!",
+    cancelSuccess: "✅ Request cancelled successfully.",
+    cancelFailed: (error) => `❌ Failed to cancel request: ${error}`,
+
+    // My requests
+    noRequests:
+      "You haven't requested any movies yet. Click the 'Request on Plex' button on any movie post to request it!",
+
+    // Admin messages
+    notConfigured:
+      "❌ Overseerr is not configured. Please set OVERSEERR_URL and OVERSEERR_API_KEY in your .env file.",
+    connectionSuccess: (version) =>
+      `✅ Connected to Overseerr successfully!\n\n**Version:** ${version}`,
+    connectionFailed: (error) =>
+      `❌ Failed to connect to Overseerr:\n${error}`,
+    noLinks: "No users are currently linked to Overseerr accounts.",
+  },
 };
