@@ -1,0 +1,49 @@
+# Codecov Configuration
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    # Overall project coverage
+    project:
+      default:
+        target: auto       # Maintain current coverage (don't drop)
+        threshold: 1%      # Allow 1% drop without failing
+        informational: true # Don't fail CI, just inform
+
+    # Coverage on changed files in PRs
+    patch:
+      default:
+        target: 50%        # New code should be at least 50% covered
+        threshold: 5%      # Allow some flexibility
+        informational: true
+
+  # Precision of coverage percentages
+  precision: 2
+  round: down
+
+# Ignore files that are hard/impossible to test
+ignore:
+  - "src/bot.js"                    # Entry point
+  - "src/commands/**"               # Discord.js command handlers (thin wrappers)
+  - "src/events/**"                 # Discord.js event handlers (routers)
+  - "src/handlers/**"               # Discord.js interaction handlers
+  - "src/utils/logger.js"           # Infrastructure code
+  - "src/utils/commandRegistration.js" # Startup code
+  - "src/messages/**"               # Language files (just data)
+  - "tests/**"                      # Don't measure test coverage
+  - "jest.config.js"                # Config files
+
+# Comment behavior on pull requests
+comment:
+  layout: "reach,diff,flags,files,footer"
+  behavior: default                 # Show comment on PRs
+  require_changes: true             # Only comment if coverage changed
+
+# Coverage visualization
+codecov:
+  notify:
+    require_ci_to_pass: false       # Don't require CI to pass for coverage upload
+
+# Path fixes (if your repo structure differs)
+fixes:
+  - "before::after"                 # Leave empty for now
