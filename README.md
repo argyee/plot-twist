@@ -1,51 +1,49 @@
 # Discord Movie Bot
 
-A Discord bot that creates movie discussion posts in a forum channel with TMDB integration, interactive buttons, and user watchlist tracking.
+A Discord bot that creates movie discussion posts in a forum channel with TMDB integration, interactive buttons, and
+user watchlist tracking.
 
 ## Features
 
 - 🎬 Search and create movie posts with autocomplete
 - 📊 Rich embeds with movie info (cast, director, rating, runtime, etc.)
 - 🔘 Interactive buttons:
-  - Mark movies as "Watched" or "Want to Watch"
-  - Quick links to IMDB
-  - **Request on Plex** - Request movies through Overseerr with 4K support
-  - Delete posts (author only with confirmation)
-  - **Watch Party Organization** - Coordinate movie nights with friends!
+    - Mark movies as "Watched" or "Want to Watch"
+    - Quick links to IMDB
+    - **Request on Plex** - Request movies through Overseerr with 4K support
+    - Delete posts (author only with confirmation)
+    - **Watch Party Organization** - Coordinate movie nights with friends!
 - 💾 SQLite database to track user watchlists
 - 📋 View your movie lists with `/mywatchlist` command
 - 🏷️ Automatic genre tagging for forum organization
 - ⭐ Reaction-based rating system
 - 🎉 **Watch Party System**:
-  - Automatic "Organize Watch Party" button when threshold reached
-  - Thread notifications when interest threshold is met
-  - Creates dedicated thread for coordination
-  - Creates Discord Scheduled Event
-  - Dynamic interest counter
-  - Prevents duplicate watch parties
+    - Automatic "Organize Watch Party" button when threshold reached
+    - Thread notifications when interest threshold is met
+    - Creates dedicated thread for coordination
+    - Creates Discord Scheduled Event
+    - Dynamic interest counter
+    - Prevents duplicate watch parties
 - 😈 **Button Bullying System**:
-  - Set which user to bully dynamically with `/bully` commands
-  - Bullied users must click ANY buttons 3 times before they work
-  - Personalized bully messages with username
-  - Universal 30-minute cooldown across ALL buttons
-  - Cooldown management (check and reset)
-  - Public messages so everyone can see the trolling
-  - See [BULLYING_SETUP.md](BULLYING_SETUP.md) for details
+    - Set which user to bully dynamically with `/bully` commands
+    - Bullied users must click ANY buttons 3 times before they work
+    - Personalized bully messages with username
+    - Universal 30-minute cooldown across ALL buttons
+    - Cooldown management (check and reset)
+    - Public messages so everyone can see the trolling
+    - See [BULLYING_SETUP.md](BULLYING_SETUP.md) for details
 - 🎬 **Overseerr Integration** (Optional):
-  - Request movies directly from Discord to your Plex server
-  - Shows real-time availability status (Available/Pending/Not Available)
-  - 4K quality toggle when requesting
-  - Admin commands to link Discord users to Overseerr accounts
-  - View and manage your requests with `/myrequests`
-  - Automatic status updates in movie post embeds
+    - Request movies directly from Discord to your Plex server
+    - Shows real-time availability status (Available/Pending/Not Available)
+    - 4K quality toggle when requesting
+    - Admin commands to link Discord users to Overseerr accounts
+    - View and manage your requests with `/myrequests`
+    - Automatic status updates in movie post embeds
 
- ## Preview
+## Preview
 
   <img width="1966" height="1272" alt="CleanShot 2025-10-29 at 17 58 36@2x" src="https://github.com/user-attachments/assets/0d18cf79-9675-482f-81cf-ea3aacd27764" />
   <img width="1546" height="1156" alt="CleanShot 2025-10-29 at 17 57 37@2x" src="https://github.com/user-attachments/assets/66e24f07-44a2-4130-b925-3c1e6ce424da" />
-
-
-
 
 ## Prerequisites
 
@@ -63,19 +61,19 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
 3. Go to the "Bot" tab and click "Add Bot"
 4. Under "Token", click "Reset Token" and copy it (you'll need this for `.env`)
 5. Under "Privileged Gateway Intents", enable:
-   - Server Members Intent
-   - Message Content Intent
+    - Server Members Intent
+    - Message Content Intent
 6. Go to "OAuth2" → "URL Generator"
 7. Select scopes: `bot`, `applications.commands`
 8. Select bot permissions:
-   - Send Messages
-   - Create Public Threads
-   - Send Messages in Threads
-   - Embed Links
-   - Attach Files
-   - Read Message History
-   - Add Reactions
-   - Use Slash Commands
+    - Send Messages
+    - Create Public Threads
+    - Send Messages in Threads
+    - Embed Links
+    - Attach Files
+    - Read Message History
+    - Add Reactions
+    - Use Slash Commands
 9. Copy the generated URL and open it in your browser to invite the bot to your server
 
 ### 2. Get a TMDB API Key
@@ -91,8 +89,8 @@ A Discord bot that creates movie discussion posts in a forum channel with TMDB i
 1. In your Discord server, create a new Forum Channel
 2. Right-click the channel → Copy ID (enable Developer Mode in Discord settings if you don't see this)
 3. Add forum tags for genres (recommended):
-   - Action, Comedy, Drama, Horror, Sci-Fi, Thriller, etc.
-   - Posts will be automatically tagged based on movie genres
+    - Action, Comedy, Drama, Horror, Sci-Fi, Thriller, etc.
+    - Posts will be automatically tagged based on movie genres
 
 ## Installation
 
@@ -152,9 +150,9 @@ By default, all commands are available to everyone. Server admins can restrict a
 2. Click on your bot
 3. Click **Manage** next to a command (e.g., `/bully` or `/overseerr`)
 4. Choose who can use it:
-   - Specific roles
-   - Specific channels
-   - Specific users
+    - Specific roles
+    - Specific channels
+    - Specific users
 5. Save changes
 
 This gives you full control over who can manage bullying settings and Overseerr without hardcoding permissions.
@@ -178,7 +176,8 @@ This gives you full control over who can manage bullying settings and Overseerr 
 - `/overseerr status` - Check Overseerr connection status
 - `/overseerr list` - List all linked accounts
 
-**Note**: Admin commands have no hardcoded permissions. Server admins should configure command permissions via **Server Settings → Integrations → Your Bot** to control who can use these commands.
+**Note**: Admin commands have no hardcoded permissions. Server admins should configure command permissions via **Server
+Settings → Integrations → Your Bot** to control who can use these commands.
 
 ## Button Interactions
 
@@ -200,15 +199,15 @@ When enough people click "Want to Watch" on a movie (configurable threshold), th
 
 1. **Interest Building**: Users click "Want to Watch" on a movie post
 2. **Threshold Reached**: When the configured number of people express interest:
-   - "Organize Watch Party" button appears automatically (Trailer button is hidden due to Discord's 5 button limit)
-   - Button shows current interest count (e.g., "Organize Watch Party (3 interested)")
-   - Bot posts a notification in the movie thread tagging all interested users
-   - Button count updates dynamically as more people join
+    - "Organize Watch Party" button appears automatically (Trailer button is hidden due to Discord's 5 button limit)
+    - Button shows current interest count (e.g., "Organize Watch Party (3 interested)")
+    - Bot posts a notification in the movie thread tagging all interested users
+    - Button count updates dynamically as more people join
 3. **Organization**: Anyone who expressed interest can click the button to:
-   - Post a coordination message in the movie's forum thread
-   - Tag all interested users
-   - Create a Discord Scheduled Event (with placeholder date +7 days)
-   - Provide coordination questions (timing, platform, preferences)
+    - Post a coordination message in the movie's forum thread
+    - Tag all interested users
+    - Create a Discord Scheduled Event (with placeholder date +7 days)
+    - Provide coordination questions (timing, platform, preferences)
 4. **Coordination**: Users discuss and finalize details in the thread
 5. **Prevention**: Once organized, the button is removed to prevent duplicates (Trailer button reappears)
 
@@ -218,16 +217,27 @@ Watch party settings can be adjusted in `src/config.js`:
 
 ```javascript
 watchParty: {
-  threshold: 3,                 // Min people needed (1 for dev, 3+ for production)
-  placeholderEventHours: 168,   // Placeholder event time (168 = 7 days)
-  eventDurationHours: 3,        // Default event duration
-  dynamicCount: true,           // Update button count as people join
-  preventDuplicates: true,      // Remove button after organization
-  trackConfirmedAttendees: true // Track confirmed attendance via reactions
+    threshold: 3,                 // Min people needed (1 for dev, 3+ for production)
+        placeholderEventHours
+:
+    168,   // Placeholder event time (168 = 7 days)
+        eventDurationHours
+:
+    3,        // Default event duration
+        dynamicCount
+:
+    true,           // Update button count as people join
+        preventDuplicates
+:
+    true,      // Remove button after organization
+        trackConfirmedAttendees
+:
+    true // Track confirmed attendance via reactions
 }
 ```
 
-**Note**: The scheduled event is created with a **placeholder time 7 days in the future**. The event description clearly indicates this is a placeholder and users should edit the event after coordinating the actual date/time in the thread.
+**Note**: The scheduled event is created with a **placeholder time 7 days in the future**. The event description clearly
+indicates this is a placeholder and users should edit the event after coordinating the actual date/time in the thread.
 
 **Note**: The threshold automatically adjusts based on `NODE_ENV`:
 
@@ -241,7 +251,71 @@ The bot uses SQLite to store user watchlists in the `data/` directory:
 - **Development**: `data/movies_dev.db` (local testing)
 - **Production**: `data/movies.db` (production server)
 
-Database selection is controlled by the `NODE_ENV` environment variable. The `data/` directory is automatically created when the bot starts and is excluded from git via `.gitignore`.
+Database selection is controlled by the `NODE_ENV` environment variable. The `data/` directory is automatically created
+when the bot starts and is excluded from git via `.gitignore`.
+
+## Logging
+
+The bot uses **Winston** for comprehensive structured logging.
+
+### Log Levels
+
+Configure the log level via the `LOG_LEVEL` environment variable in `.env`:
+
+```env
+# Development (shows all logs)
+LOG_LEVEL=debug
+
+# Production (shows info, warn, error)
+LOG_LEVEL=info
+
+# Only warnings and errors
+LOG_LEVEL=warn
+
+# Only errors
+LOG_LEVEL=error
+```
+
+### Log Output
+
+**Development Mode** (`NODE_ENV=development`):
+
+- Colored, human-readable console output
+- All log levels visible when `LOG_LEVEL=debug`
+- Easier debugging with formatted metadata
+
+**Production Mode** (`NODE_ENV=production`):
+
+- JSON-formatted logs with timestamps
+- Separate log files in `logs/` directory:
+    - `logs/error.log` - Only errors
+    - `logs/combined.log` - All log levels
+- Suitable for log aggregation tools
+
+### What's Logged
+
+Every important operation is logged with rich metadata:
+
+- ✅ User interactions (button presses, commands)
+- ✅ Database operations (add, remove, query)
+- ✅ API calls (TMDB searches, Overseerr requests)
+- ✅ Watch party events (threshold reached, party created)
+- ✅ Bullying system events (press counts, cooldowns)
+- ✅ Errors with full stack traces
+
+Example log entry:
+
+```json
+{
+  "level": "info",
+  "message": "Movie request created from button",
+  "movieTitle": "Fight Club",
+  "movieId": "550",
+  "discordUser": "User#1234",
+  "is4k": true,
+  "timestamp": "2025-01-15T10:30:45.123Z"
+}
+```
 
 ## Testing
 
@@ -257,7 +331,23 @@ Run tests in watch mode (auto-rerun on changes):
 npm run test:watch
 ```
 
-The project uses Jest for testing. Tests are located in the `tests/` directory.
+The project uses Jest for testing with **159 passing tests**. Tests are located in the `tests/` directory.
+
+### Test Coverage
+
+- ✅ **Database operations** - All CRUD operations and queries
+- ✅ **Bullying system** - Cooldown logic, press tracking, edge cases
+- ✅ **Button builder** - Dynamic button creation with 5-button limit
+- ✅ **TMDB integration** - Search and movie details with error handling
+- ✅ **Overseerr integration** - Status checks, requests, user management
+- ✅ **Configuration** - Genre mappings and settings validation
+
+### Test Infrastructure
+
+- **In-memory database** for fast, isolated tests
+- **Logger mocking** for clean test output (via `tests/setup.js`)
+- **Time mocking** for testing cooldown logic
+- **API mocking** for testing external integrations
 
 ## Deployment
 
@@ -305,7 +395,9 @@ discord_moviebot/
 │   │       └── delete.js   # Delete button handlers
 │   ├── utils/              # Utility functions
 │   │   ├── buttonBuilder.js      # Dynamic button creation
-│   │   └── commandRegistration.js # Slash command registration
+│   │   ├── mediaRequestModal.js  # Shared modal creation utilities
+│   │   ├── commandRegistration.js # Slash command registration
+│   │   └── logger.js              # Winston logger configuration
 │   ├── services/           # External integrations & config
 │   │   ├── config.js       # Configuration (genres, emojis, settings)
 │   │   ├── database.js     # SQLite database operations
@@ -320,8 +412,13 @@ discord_moviebot/
 │   ├── movies_dev.db       # Development database
 │   └── movies.db           # Production database
 ├── tests/                  # Jest tests
+│   ├── setup.js            # Global test setup (logger mocking)
 │   ├── config.test.js
-│   └── database.test.js
+│   ├── database.test.js
+│   ├── bullying.test.js
+│   ├── buttonBuilder.test.js
+│   ├── tmdb.test.js
+│   └── overseerr.test.js
 ├── .env                    # Environment variables (not in git)
 ├── .env.example            # Environment template
 ├── .gitignore              # Git ignore rules
@@ -341,9 +438,9 @@ The bot follows a modular architecture with clear separation of concerns:
 - **Handlers** ([src/handlers/](src/handlers/)) - Processes different interaction types (autocomplete, buttons)
 - **Utils** ([src/utils/](src/utils/)) - Shared utility functions and builders
 - **Services** ([src/services/](src/services/)) - External integrations, data management, and configuration
-  - [config.js](src/services/config.js) - Centralized configuration
-  - [database.js](src/services/database.js) - SQLite database operations
-  - [tmdb.js](src/services/tmdb.js) - TMDB API integration
+    - [config.js](src/services/config.js) - Centralized configuration
+    - [database.js](src/services/database.js) - SQLite database operations
+    - [tmdb.js](src/services/tmdb.js) - TMDB API integration
 - **Messages** ([src/messages/](src/messages/)) - Internationalization (i18n) support
 
 ## Language & Translation
@@ -384,7 +481,9 @@ Example:
 buttonWatched: "Watched",
 
 // src/messages/el.js
-buttonWatched: "Έχω δει",
+    buttonWatched
+:
+"Έχω δει",
 ```
 
 ### Adding More Languages
@@ -432,6 +531,7 @@ Use admin commands to link Discord users to their Overseerr/Plex accounts:
 ```
 
 Or use their Plex email:
+
 ```
 /overseerr link @username user@example.com
 ```
@@ -441,11 +541,13 @@ The bot will search Overseerr for a matching user and create the link.
 ### 4. Verify Setup
 
 Test the connection:
+
 ```
 /overseerr status
 ```
 
 View all linked accounts:
+
 ```
 /overseerr list
 ```
@@ -455,8 +557,8 @@ View all linked accounts:
 1. **Account Linking**: Admin links Discord users to their Overseerr accounts using usernames or emails
 2. **Automatic Status**: Movie posts show availability status (Available/Pending/Request)
 3. **Request Methods**:
-   - **From Movie Posts**: Click "Request on Plex" button on any movie post
-   - **Quick Request**: Use `/request [title]` command for instant requests without creating posts
+    - **From Movie Posts**: Click "Request on Plex" button on any movie post
+    - **Quick Request**: Use `/request [title]` command for instant requests without creating posts
 4. **4K Toggle**: Modal appears allowing users to request in 4K quality
 5. **Request Management**: Users view their requests with `/myrequests`
 
@@ -465,16 +567,19 @@ View all linked accounts:
 You have three ways to link users:
 
 **Option 1: By Overseerr Display Name**
+
 ```
 /overseerr link @discorduser OverseerrUsername
 ```
 
 **Option 2: By Plex Username**
+
 ```
 /overseerr link @discorduser PlexUsername
 ```
 
 **Option 3: By Plex Email**
+
 ```
 /overseerr link @discorduser user@example.com
 ```
@@ -484,6 +589,7 @@ The bot searches all three fields and creates the link automatically.
 ### Unlinking
 
 To remove a link:
+
 ```
 /overseerr unlink @username
 ```

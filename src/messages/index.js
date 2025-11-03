@@ -14,26 +14,35 @@
 const LANGUAGE = process.env.LANGUAGE || "en";
 
 const languages = {
-  en: require("./en"),
-  el: require("./el"),
+    en: require("./en"),
+    el: require("./el"),
 };
 
 // Export the selected language, fallback to English if language not found
 module.exports = languages[LANGUAGE] || languages.en;
 
 // Log which language is being used (helpful for debugging)
-if (LANGUAGE !== "en" && !languages[LANGUAGE]) {
-  console.warn(
-    `⚠️  Language '${LANGUAGE}' not found. Falling back to English.`
-  );
-} else {
-  console.log(
-    `🌍 Bot language: ${
-      LANGUAGE === "en"
-        ? "English"
-        : LANGUAGE === "el"
-        ? "Greek (Ελληνικά)"
-        : LANGUAGE
-    }`
-  );
+// Note: Logger is imported after module.exports to avoid circular dependency
+// but it should be initialized by the time this code runs
+try {
+    const logger = require("../utils/logger");
+
+    if (LANGUAGE !== "en" && !languages[LANGUAGE]) {
+        logger.warn("Language not found, falling back to English", {
+            requestedLanguage: LANGUAGE,
+            fallbackLanguage: "en",
+        });
+    } else {
+        const languageNames = {
+            en: "English",
+            el: "Greek (Ελληνικά)",
+        };
+        logger.info("Bot language loaded", {
+            language: LANGUAGE,
+            languageName: languageNames[LANGUAGE] || LANGUAGE,
+        });
+    }
+} catch (error) {
+    // Fallback to console if logger is not yet available
+    console.log(`🌍 Bot language: ${LANGUAGE}`);
 }

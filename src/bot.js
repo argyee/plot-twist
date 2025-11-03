@@ -3,8 +3,8 @@
  * A Discord bot for creating and managing movie discussion forums
  */
 
-const { Client, GatewayIntentBits } = require("discord.js");
-require("dotenv").config({ override: true });
+const {Client, GatewayIntentBits} = require("discord.js");
+require("dotenv").config({override: true});
 
 // Event handlers
 const handleReady = require("./events/ready");
@@ -12,13 +12,13 @@ const handleInteractionCreate = require("./events/interactionCreate");
 
 // Initialize Discord client
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
 // Register event handlers
 client.once("clientReady", () => handleReady(client));
 client.on("interactionCreate", (interaction) =>
-  handleInteractionCreate(client, interaction)
+    handleInteractionCreate(client, interaction)
 );
 
 // Login to Discord

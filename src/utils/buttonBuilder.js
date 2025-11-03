@@ -3,12 +3,12 @@
  * Creates button rows for movie posts
  */
 
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const {ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const messages = require("../messages");
 const config = require("../services/config");
 const {
-  getMovieStatusCount,
-  watchPartyExists,
+    getMovieStatusCount,
+    watchPartyExists,
 } = require("../services/database");
 const overseerr = require("../services/overseerr");
 
@@ -22,89 +22,89 @@ const overseerr = require("../services/overseerr");
  * @returns {ActionRowBuilder} Button row component
  */
 function buildMovieButtons(movieId, authorId, movie, overseerStatus = null) {
-  const buttons = [
-    new ButtonBuilder()
-      .setCustomId(`watched_${authorId}_${movieId}`)
-      .setLabel(messages.buttonWatched)
-      .setEmoji("✅")
-      .setStyle(ButtonStyle.Success),
-    new ButtonBuilder()
-      .setCustomId(`watchlist_${authorId}_${movieId}`)
-      .setLabel(messages.buttonWantToWatch)
-      .setEmoji("📌")
-      .setStyle(ButtonStyle.Primary),
-    new ButtonBuilder()
-      .setCustomId(`delete_${authorId}`)
-      .setLabel(messages.buttonDelete)
-      .setEmoji("🗑️")
-      .setStyle(ButtonStyle.Danger),
-  ];
-
-  // Check if watch party button should be shown
-  const wantToWatchCount = getMovieStatusCount(movieId, "want_to_watch");
-  const hasWatchParty = watchPartyExists(movieId);
-  const showWatchParty =
-    config.watchParty.dynamicCount &&
-    wantToWatchCount >= config.watchParty.threshold &&
-    !hasWatchParty;
-
-  // Add IMDB button if available
-  if (movie.imdbUrl) {
-    buttons.push(
-      new ButtonBuilder()
-        .setLabel(messages.buttonIMDB)
-        .setURL(movie.imdbUrl)
-        .setStyle(ButtonStyle.Link)
-        .setEmoji("⭐")
-    );
-  }
-
-  // Add Overseerr request button (replaces trailer button)
-  if (overseerr.isConfigured() && overseerStatus) {
-    if (overseerStatus.available) {
-      // Movie is available on Plex
-      buttons.push(
+    const buttons = [
         new ButtonBuilder()
-          .setCustomId(`request_${movieId}`)
-          .setLabel(messages.buttonAvailableOnPlex)
-          .setEmoji("🟢")
-          .setStyle(ButtonStyle.Success)
-          .setDisabled(true)
-      );
-    } else if (overseerStatus.requested || overseerStatus.processing) {
-      // Movie has been requested or is processing
-      buttons.push(
+            .setCustomId(`watched_${authorId}_${movieId}`)
+            .setLabel(messages.buttonWatched)
+            .setEmoji("✅")
+            .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
-          .setCustomId(`request_${movieId}`)
-          .setLabel(messages.buttonRequestPending)
-          .setEmoji("🟡")
-          .setStyle(ButtonStyle.Secondary)
-          .setDisabled(true)
-      );
-    } else {
-      // Movie can be requested
-      buttons.push(
+            .setCustomId(`watchlist_${authorId}_${movieId}`)
+            .setLabel(messages.buttonWantToWatch)
+            .setEmoji("📌")
+            .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
-          .setCustomId(`request_${movieId}`)
-          .setLabel(messages.buttonRequestOnPlex)
-          .setEmoji("📥")
-          .setStyle(ButtonStyle.Primary)
-      );
+            .setCustomId(`delete_${authorId}`)
+            .setLabel(messages.buttonDelete)
+            .setEmoji("🗑️")
+            .setStyle(ButtonStyle.Danger),
+    ];
+
+    // Check if watch party button should be shown
+    const wantToWatchCount = getMovieStatusCount(movieId, "want_to_watch");
+    const hasWatchParty = watchPartyExists(movieId);
+    const showWatchParty =
+        config.watchParty.dynamicCount &&
+        wantToWatchCount >= config.watchParty.threshold &&
+        !hasWatchParty;
+
+    // Add IMDB button if available
+    if (movie.imdbUrl) {
+        buttons.push(
+            new ButtonBuilder()
+                .setLabel(messages.buttonIMDB)
+                .setURL(movie.imdbUrl)
+                .setStyle(ButtonStyle.Link)
+                .setEmoji("⭐")
+        );
     }
-  }
 
-  // Add watch party button if threshold reached (but not if it would exceed 5 button limit)
-  if (showWatchParty && buttons.length < 5) {
-    buttons.push(
-      new ButtonBuilder()
-        .setCustomId(`watch_party_${movieId}`)
-        .setLabel(messages.buttonWatchParty(wantToWatchCount))
-        .setEmoji("🎉")
-        .setStyle(ButtonStyle.Success)
-    );
-  }
+    // Add Overseerr request button (replaces trailer button)
+    if (overseerr.isConfigured() && overseerStatus) {
+        if (overseerStatus.available) {
+            // Movie is available on Plex
+            buttons.push(
+                new ButtonBuilder()
+                    .setCustomId(`request_${movieId}`)
+                    .setLabel(messages.buttonAvailableOnPlex)
+                    .setEmoji("🟢")
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(true)
+            );
+        } else if (overseerStatus.requested || overseerStatus.processing) {
+            // Movie has been requested or is processing
+            buttons.push(
+                new ButtonBuilder()
+                    .setCustomId(`request_${movieId}`)
+                    .setLabel(messages.buttonRequestPending)
+                    .setEmoji("🟡")
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true)
+            );
+        } else {
+            // Movie can be requested
+            buttons.push(
+                new ButtonBuilder()
+                    .setCustomId(`request_${movieId}`)
+                    .setLabel(messages.buttonRequestOnPlex)
+                    .setEmoji("📥")
+                    .setStyle(ButtonStyle.Primary)
+            );
+        }
+    }
 
-  return new ActionRowBuilder().addComponents(...buttons);
+    // Add watch party button if threshold reached (but not if it would exceed 5 button limit)
+    if (showWatchParty && buttons.length < 5) {
+        buttons.push(
+            new ButtonBuilder()
+                .setCustomId(`watch_party_${movieId}`)
+                .setLabel(messages.buttonWatchParty(wantToWatchCount))
+                .setEmoji("🎉")
+                .setStyle(ButtonStyle.Success)
+        );
+    }
+
+    return new ActionRowBuilder().addComponents(...buttons);
 }
 
-module.exports = { buildMovieButtons };
+module.exports = {buildMovieButtons};

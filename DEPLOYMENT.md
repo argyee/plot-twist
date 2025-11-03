@@ -30,12 +30,14 @@ git push origin master
 ### 2. Server Deployment
 
 #### SSH into Server
+
 ```bash
 ssh user@your-server
 cd /path/to/discord_moviebot
 ```
 
 #### Pull Latest Changes
+
 ```bash
 # Pull from your branch
 git pull origin feature/branch
@@ -45,6 +47,7 @@ git pull origin master
 ```
 
 #### Install Dependencies
+
 ```bash
 # This automatically installs better-sqlite3 and all dependencies
 npm install
@@ -53,11 +56,13 @@ npm install
 #### Configure Environment Variables
 
 **Option A: Edit .env file**
+
 ```bash
 nano .env
 ```
 
 Add production values:
+
 ```env
 NODE_ENV=production
 LANGUAGE=en
@@ -68,9 +73,11 @@ TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
 ```
 
 **Option B: Use existing .env** (if already configured)
+
 - No changes needed if .env already exists with correct values
 
 #### Create data/ Directory (First Time Only)
+
 ```bash
 # The data/ folder is created automatically when bot starts
 # But you can create it manually if needed
@@ -80,6 +87,7 @@ mkdir -p data
 ### 3. Restart the Bot
 
 #### If using PM2:
+
 ```bash
 # First deployment
 pm2 start src/bot.js --name discord-moviebot
@@ -95,6 +103,7 @@ pm2 status
 ```
 
 #### If using npm directly:
+
 ```bash
 # Stop existing process (Ctrl+C or kill the process)
 # Then start
@@ -102,6 +111,7 @@ npm start
 ```
 
 #### If using systemd service:
+
 ```bash
 sudo systemctl restart discord-moviebot
 sudo systemctl status discord-moviebot
@@ -110,6 +120,7 @@ sudo systemctl status discord-moviebot
 ### 4. Verify Deployment
 
 Check that bot is running:
+
 ```bash
 # PM2
 pm2 status
@@ -120,6 +131,7 @@ ps aux | grep node
 ```
 
 Look for these success messages in logs:
+
 ```
 ✅ Bot is online as YourBot#1234
 ✅ Slash commands registered successfully!
@@ -128,6 +140,7 @@ Look for these success messages in logs:
 ```
 
 Test in Discord:
+
 - Run `/movie` command
 - Try all buttons
 - Check `/mywatchlist`
@@ -135,6 +148,7 @@ Test in Discord:
 ## Troubleshooting
 
 ### Dependencies not installing
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -142,6 +156,7 @@ npm install
 ```
 
 ### Database errors
+
 ```bash
 # Check data/ folder exists and is writable
 ls -la data/
@@ -152,6 +167,7 @@ pm2 logs discord-moviebot | grep "Using database"
 ```
 
 ### Bot not starting
+
 ```bash
 # Check environment variables
 cat .env
@@ -163,6 +179,7 @@ pm2 logs discord-moviebot --err
 ```
 
 ### Commands not registering
+
 ```bash
 # Commands register on bot startup
 # If bot was already running, restart it

@@ -2,13 +2,15 @@
 
 ## What This Does
 
-The bullying system allows administrators to dynamically set which user will be "bullied" by the bot. When a bullied user clicks ANY button, the bot will:
+The bullying system allows administrators to dynamically set which user will be "bullied" by the bot. When a bullied
+user clicks ANY button, the bot will:
 
 1. **1st click (any button):** Reply with a custom message (e.g., "What are you doing there, username? 🤨")
 2. **2nd click (any button):** Reply with another custom message (e.g., "Still trying, username? 😏")
 3. **3rd click (any button):** Actually execute the button action
 
-After the 3rd successful click, there's a **30-minute universal cooldown** where all buttons work normally, then the bullying resets.
+After the 3rd successful click, there's a **30-minute universal cooldown** where all buttons work normally, then the
+bullying resets.
 
 ## Features
 
@@ -187,7 +189,7 @@ secondPressMessage: (username) => `❌ Still trying, ${username}? 😏`,
 
 ```javascript
 // BULLYING MESSAGES
-firstPressMessage: (username) => `Geomit δικέ μου ${username}, συγκατάθεση ξέρεις τι σημαίνει;`,
+firstPressMessage: (username) => `${username}, συγκατάθεση ξέρεις τι σημαίνει;`,
 secondPressMessage: (username) => `Μη με ακουμπάς ρε ${username}!`,
 ```
 
@@ -345,7 +347,7 @@ Bot (private): ✅ Reset cooldown for @JohnDoe.
 ## Quick Command Reference
 
 | Command             | Description                | Who Can Use |
-| ------------------- | -------------------------- | ----------- |
+|---------------------|----------------------------|-------------|
 | `/bully set <user>` | Enable bullying for a user | Admins only |
 | `/bully remove`     | Disable bullying           | Admins only |
 | `/bully status`     | Check who is being bullied | Admins only |
