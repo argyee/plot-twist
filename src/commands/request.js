@@ -97,7 +97,7 @@ module.exports = {
 
         // If already available, inform user
         if (status.available) {
-            logger.debug("Request blocked - movie already available", {
+            logger.info("Request blocked - movie already available", {
                 movieId,
                 movieTitle: movie.title,
                 userId: interaction.user.id,
@@ -110,7 +110,7 @@ module.exports = {
 
         // If already requested, inform user
         if (status.requested || status.processing) {
-            logger.debug("Request blocked - movie already requested", {
+            logger.info("Request blocked - movie already requested", {
                 movieId,
                 movieTitle: movie.title,
                 userId: interaction.user.id,
