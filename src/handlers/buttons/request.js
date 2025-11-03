@@ -74,7 +74,7 @@ async function handleRequestButton(interaction) {
 
     // If already available, inform user
     if (status.available) {
-        logger.debug("Request blocked - movie already available", {
+        logger.info("Request blocked - movie already available", {
             movieId,
             userId,
         });
@@ -86,7 +86,7 @@ async function handleRequestButton(interaction) {
 
     // If already requested, inform user
     if (status.requested || status.processing) {
-        logger.debug("Request blocked - movie already requested", {
+        logger.info("Request blocked - movie already requested", {
             movieId,
             userId,
         });
@@ -139,7 +139,7 @@ async function handleRequestModal(interaction) {
     // Check status again to prevent double-requests
     const status = await overseerr.getMovieStatus(movieId);
     if (status.available) {
-        logger.debug("Request modal blocked - movie already available", {
+        logger.info("Request modal blocked - movie already available", {
             movieId,
             userId,
         });
@@ -149,7 +149,7 @@ async function handleRequestModal(interaction) {
     }
 
     if (status.requested || status.processing) {
-        logger.debug("Request modal blocked - movie already requested", {
+        logger.info("Request modal blocked - movie already requested", {
             movieId,
             userId,
         });
@@ -262,7 +262,7 @@ async function handleQuickRequestModal(interaction) {
     // Check status again to prevent double-requests
     const status = await overseerr.getMovieStatus(movieId);
     if (status.available) {
-        logger.debug("Quick request blocked - movie already available", {
+        logger.info("Quick request blocked - movie already available", {
             movieId,
             userId,
         });
@@ -272,7 +272,7 @@ async function handleQuickRequestModal(interaction) {
     }
 
     if (status.requested || status.processing) {
-        logger.debug("Quick request blocked - movie already requested", {
+        logger.info("Quick request blocked - movie already requested", {
             movieId,
             userId,
         });
