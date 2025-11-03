@@ -6,9 +6,6 @@
 const {
     SlashCommandBuilder,
     EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
     ChatInputCommandInteraction,
 } = require("discord.js");
 const overseerr = require("../services/overseerr");
